@@ -425,70 +425,129 @@ async def shift(interaction: discord.Interaction):
             await interaction.response.send_message("An error occured while sending.", ephemeral=True)
     else:
         await interaction.response.send_message("Nuh - Uh. You don't have the required role to run this command.", ephemeral=True)
-@bot.tree.command(name="ban", description="Ban a user from the server")  
-async def ban(interaction: discord.Interaction, user: discord.Member, reason: str = None):  
-    guild = await bot.fetch_guild(GUILD_ID)
-    member = await guild.fetch_member(interaction.user.id)
-    if member and any(role.id == "1325941896438223001" for role in member.roles):
-        # Get the channel to send the message to
+@bot.tree.command(name="ban", description="Ban a user from the server")
+async def ban(interaction: discord.Interaction, user: discord.Member, reason: str = "No reason provided"):
+    # Check if the bot has the ban_members permission
+    if not interaction.guild.me.guild_permissions.ban_members:
+        await interaction.response.send_message("I don't have permission to ban members!", ephemeral=True)
+        return
 
-       
-            # Create the embed
-            embed = discord.Embed(
-                title="You Have Been Banned",
-                description=f"Oh-No! You have been banned for {reason} If you think this a mistake, contact a admin!",
-                color=hex_color
-            )
-            embed.set_footer(text="Bot Powered by Cj's Commissions")
-            await user.send(embed=embed)
-            await user.ban(reason=reason)  
-            await interaction.response.send_message(f"Banned successfully!", ephemeral=True)  
-@bot.tree.command(name="unban", description="Unban a user from the server")  
-async def ban(interaction: discord.Interaction, user: discord.Member):  
+    # Check if the command user has the required role
+    if not any(role.id == 1325941896438223001 for role in interaction.user.roles):  # Ensure role ID is an integer
+        await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
+        return
+
+    try:
+        # Attempt to send the user a DM
+        embed = discord.Embed(
+            title="You Have Been Banned",
+            description=f"Oh-No! You have been banned for: {reason}. If you think this is a mistake, contact an admin!",
+            color=hex_color
+        )
+        embed.set_footer(text="Bot Powered by Cj's Commissions")
+        await user.send(embed=embed)
+    except discord.Forbidden:
+        # DM failed, continue to ban
+        pass
+
+    try:
+        # Ban the user
+        await user.ban(reason=reason)
+        await interaction.response.send_message(f"Banned {user.mention} successfully!", ephemeral=True)
+    except discord.Forbidden:
+        await interaction.response.send_message("I don't have permission to ban this user.", ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"An error occurred while banning: {e}", ephemeral=True)
+
+@bot.tree.command(name="unban", description="Unban a user from the server")
+async def unban(interaction: discord.Interaction, user_id: int):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
-    if member and any(role.id == "1325941896438223001" for role in member.roles):
-            await user.unban() 
-            await interaction.response.send_message(f"Unbanned successfully!", ephemeral=True)      
+    
+    if member and any(role.id == 1325941896438223001 for role in member.roles):  # Ensure role ID is an integer
+        try:
+            # Attempt to unban the user
+            user = discord.Object(user_id)  # Convert the user ID to a discord.Object
+            await guild.unban(user)
+            await interaction.response.send_message(f"Unbanned user with ID {user_id} successfully!", ephemeral=True)
+        except discord.NotFound:
+            await interaction.response.send_message(f"No banned user with ID {user_id} found.", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"Failed to unban user. Error: {e}", ephemeral=True)
+    else:
+        await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
+
 @bot.tree.command(name="purge", description="Purge a number of messages")  
 async def clear(interaction: discord.Interaction, amount: int):  
     await interaction.channel.purge(limit=amount)  
     await interaction.response.send_message(f"Purged {amount} messages.", delete_after=5)  
-@bot.tree.command(name="kick", description="Kick a user from the server")  
-async def ban(interaction: discord.Interaction, user: discord.Member, reason: str = None):  
+@@bot.tree.command(name="kick", description="Kick a user from the server")
+async def kick(interaction: discord.Interaction, user: discord.Member, reason: str = "No reason provided"):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
-    if member and any(role.id == "1325941896438223001" for role in member.roles):
-        # Get the channel to send the message to
-
-       
+    
+    if member and any(role.id == 1325941896438223001 for role in member.roles):  # Ensure role ID is an integer
+        try:
             # Create the embed
             embed = discord.Embed(
                 title="You Have Been Kicked",
-                description=f"Oh-No! You have been kicked for {reason}. You can rejoin via: https://discord.gg/HxntPDGZ57",
+                description=f"Oh no! You have been kicked for: {reason}. You can rejoin via: https://discord.gg/HxntPDGZ57",
                 color=hex_color
             )
             embed.set_footer(text="Bot Powered by Cj's Commissions")
-            await user.send(embed=embed)
-            await user.kick(reason=reason)  
-            await interaction.response.send_message(f"Banned successfully!", ephemeral=True)  
+            
+            # Try sending the DM to the user
+            try:
+                await user.send(embed=embed)
+            except discord.Forbidden:
+                await interaction.response.send_message(f"Could not DM {user.name}, but they will be kicked.", ephemeral=True)
+            
+            # Kick the user
+            await user.kick(reason=reason)
+            await interaction.response.send_message(f"Kicked {user.name} successfully!", ephemeral=True)
+        
+        except Exception as e:
+            await interaction.response.send_message(f"Failed to kick {user.name}. Error: {e}", ephemeral=True)
+    else:
+        await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
+
+
 @bot.tree.command(name="timeout", description="Timeout a user.")
 async def mute(interaction: discord.Interaction, user: discord.Member, duration: int, reason: str = "No reason provided"):
-    guild = await bot.fetch_guild(GUILD_ID)
-    member = await guild.fetch_member(interaction.user.id)
-    if member and any(role.id == "1325941896438223001" for role in member.roles):
-        embed = discord.Embed(
-            title="You Have Been Timed Out",
-            description=f"Oh-No! You have been timed out for {reason}. It will be removed in {duration} minutes.",
-            color=hex_color
-        )
-        embed.set_footer(text="Bot Powered by Cj's Commissions")
-        
+    # Check if the bot has the moderate_members permission
+    if not interaction.guild.me.guild_permissions.moderate_members:
+        await interaction.response.send_message("I don't have permission to timeout members!", ephemeral=True)
+        return
+
+    # Check if the command user has the required role
+    if not any(role.id == 1325941896438223001 for role in interaction.user.roles):  # Ensure role ID is an integer
+        await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
+        return
+
+    # Create an embed for the user
+    embed = discord.Embed(
+        title="You Have Been Timed Out",
+        description=f"Oh-No! You have been timed out for: {reason}. It will be removed in {duration} minutes.",
+        color=hex_color
+    )
+    embed.set_footer(text="Bot Powered by Cj's Commissions")
+
+    try:
+        # Timeout the user
+        await user.timeout(timedelta(minutes=duration), reason=reason)
+
+        # Attempt to send a DM
         try:
-            await user.timeout(timedelta(minutes=duration), reason=reason)
-            await user.send(embed=embed)  # Send the timeout message to the user
-            await interaction.response.send_message(f"Timed out {user.name} for {duration} minute(s). Reason: {reason}", ephemeral=True)
-        except Exception as e:
-            await interaction.response.send_message(f"Failed to timeout {user.name}. Error: {e}", ephemeral=True)
+            await user.send(embed=embed)
+        except discord.Forbidden:
+            pass  # Ignore if the user has DMs disabled
+
+        # Send confirmation to the interaction user
+        await interaction.response.send_message(f"Timed out {user.mention} for {duration} minute(s). Reason: {reason}", ephemeral=True)
+    except discord.Forbidden:
+        await interaction.response.send_message("I don't have permission to timeout this user.", ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"Failed to timeout {user.name}. Error: {e}", ephemeral=True)
+
 
 bot.run(TOKEN)
