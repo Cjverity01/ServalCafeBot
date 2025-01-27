@@ -580,6 +580,9 @@ class FormModal(Modal):
 
     async def callback(self, interaction: discord.Interaction):
         try:
+            # Log when the callback is triggered
+            logger.info("Modal callback triggered.")
+
             # Retrieve values from the form inputs
             roblox_username = self.robloxuser_input.value
             dc_username = self.dcuser_input.value
@@ -596,11 +599,11 @@ class FormModal(Modal):
                         f"Reason: {reason}")
 
             # Check if bot can get the channel
-            channel = bot.get_channel(1333571422970445955)
+            channel = bot.get_channel(int("1333571422970445955"))
             if not channel:
-                logger.error(f"Could not find channel with ID 1333571422970445955.")
+                logger.error("Could not find channel with ID 1333571422970445955.")
                 raise ValueError("Channel not found")
-
+            
             logger.info(f"Channel found: {channel.name}")
 
             embed = discord.Embed(
@@ -615,12 +618,8 @@ class FormModal(Modal):
             )
 
             # Attempt to send the embed to the channel
-            try:
-                await channel.send(embed=embed)
-                logger.info("Embed sent to the channel successfully.")
-            except Exception as e:
-                logger.error(f"Error sending embed to the channel: {e}")
-                raise
+            await channel.send(embed=embed)
+            logger.info("Embed sent to the channel successfully.")
 
             # Send a confirmation response to the user
             await interaction.response.send_message(
@@ -631,24 +630,24 @@ class FormModal(Modal):
         except Exception as e:
             # Log the full exception details
             logger.error(f"Error occurred during form submission: {e}")
-            logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-
-            # Send a more detailed error message to the user
+            # Log full traceback for better debugging
+            logger.error(traceback.format_exc())
             await interaction.response.send_message(f"Something went wrong: {str(e)}. Please try again.", ephemeral=True)
 
 # Command to trigger the form modal
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
     try:
+        # Log when the command is triggered
+        logger.info("LOA command triggered.")
+
         # Show the form to the user
         modal = FormModal()
         await interaction.response.send_modal(modal)
+        logger.info("Modal sent successfully.")
     except Exception as e:
-        # Log the full exception details
+        # Log any exceptions that occur during modal sending
         logger.error(f"Error occurred while sending the modal: {e}")
-        logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-
-        # Send an error message to the user
         await interaction.response.send_message("There was an issue opening the form. Please try again later.", ephemeral=True)
 
 bot.run(TOKEN)
