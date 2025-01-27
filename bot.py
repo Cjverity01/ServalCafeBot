@@ -612,7 +612,7 @@ class FormModal(Modal):
                 raise ValueError("Dates must be in the format DD/MM/YY.")
 
             # Retrieve the channel
-            channel = self.bot.get_channel(1333571422970445955)
+            channel = bot.get_channel(1333571422970445955)
             if not channel:
                 raise ValueError("Could not find the specified channel. Check the channel ID.")
 
