@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 from datetime import timedelta
 from discord.ui import Modal, TextInput, Button, View
+import traceback
 load_dotenv()
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
 GUILD_ID = os.getenv("GUILD_ID")
@@ -563,6 +564,7 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
 
 
 
+
 class FormModal(Modal):
     def __init__(self):
         super().__init__(title="LOA Form Submission")
@@ -623,9 +625,12 @@ class FormModal(Modal):
                 ephemeral=True
             )
         except Exception as e:
-            # Catch and log any exceptions that occur during the submission process
+            # Log the full exception details
             logger.error(f"Error occurred during form submission: {e}")
-            await interaction.response.send_message(f"Something went wrong: {str(e)}", ephemeral=True)
+            logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
+
+            # Send a more detailed error message to the user
+            await interaction.response.send_message(f"Something went wrong: {str(e)}. Please try again.", ephemeral=True)
 
 # Command to trigger the form modal
 @bot.tree.command(name="request-loa", description="Request an LOA")
@@ -635,7 +640,11 @@ async def loa_command(interaction: discord.Interaction):
         modal = FormModal()
         await interaction.response.send_modal(modal)
     except Exception as e:
+        # Log the full exception details
         logger.error(f"Error occurred while sending the modal: {e}")
+        logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
+        
+        # Send an error message to the user
         await interaction.response.send_message("There was an issue opening the form. Please try again later.", ephemeral=True)
 
 bot.run(TOKEN)
