@@ -10,10 +10,17 @@ LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
 GUILD_ID = os.getenv("GUILD_ID")
 RANKING_ROLE_ID = os.getenv("RANKING_ROLE_ID")
 hex_color = int("86A269", 16)
-# Create the bot instance
 intents = discord.Intents.default()
-intents.messages = True  # Enable the messages intent
+intents.message_content = True  # Enable message content intent (important for reading message content)
+intents.members = True  # Enable the members intent
+
+# Create the bot object and pass intents
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+
+
+
+
 
 TOKEN = os.getenv("TOKEN")
 @bot.event
