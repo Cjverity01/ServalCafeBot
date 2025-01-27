@@ -563,12 +563,6 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
 
 
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-# Define the Modal Form
 class FormModal(Modal):
     def __init__(self):
         super().__init__(title="LOA Form Submission")
@@ -643,7 +637,5 @@ async def loa_command(interaction: discord.Interaction):
     except Exception as e:
         logger.error(f"Error occurred while sending the modal: {e}")
         await interaction.response.send_message("There was an issue opening the form. Please try again later.", ephemeral=True)
-
-
 
 bot.run(TOKEN)
