@@ -560,11 +560,6 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
         await interaction.response.send_message("I don't have permission to timeout this user.", ephemeral=True)
     except Exception as e:
         await interaction.response.send_message(f"Failed to timeout {user.name}. Error: {e}", ephemeral=True)
-
-
-
-
-
 class FormModal(Modal):
     def __init__(self):
         super().__init__(title="LOA Form Submission")
@@ -600,11 +595,14 @@ class FormModal(Modal):
                         f"End Date: {loa_end}\n"
                         f"Reason: {reason}")
 
-            # Send the form details to the specified channel
-            channel = bot.get_channel(1333571422970445955)  # Channel ID here
+            # Check if bot can get the channel
+            channel = bot.get_channel(1333571422970445955)
             if not channel:
+                logger.error(f"Could not find channel with ID 1333571422970445955.")
                 raise ValueError("Channel not found")
-            
+
+            logger.info(f"Channel found: {channel.name}")
+
             embed = discord.Embed(
                 title="Someone Has Requested an LOA",
                 description=f"<@{interaction.user.id}> has requested an LOA.\n\n**Form Details:**\n"
@@ -615,8 +613,14 @@ class FormModal(Modal):
                             f"**Reason:** {reason}",
                 color=discord.Color.green()
             )
-            await channel.send(embed=embed)
-            logger.info("Embed sent to the channel successfully.")
+
+            # Attempt to send the embed to the channel
+            try:
+                await channel.send(embed=embed)
+                logger.info("Embed sent to the channel successfully.")
+            except Exception as e:
+                logger.error(f"Error sending embed to the channel: {e}")
+                raise
 
             # Send a confirmation response to the user
             await interaction.response.send_message(
@@ -643,7 +647,7 @@ async def loa_command(interaction: discord.Interaction):
         # Log the full exception details
         logger.error(f"Error occurred while sending the modal: {e}")
         logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        
+
         # Send an error message to the user
         await interaction.response.send_message("There was an issue opening the form. Please try again later.", ephemeral=True)
 
