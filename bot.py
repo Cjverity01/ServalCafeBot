@@ -563,6 +563,11 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
 
 
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
 # Define the Modal Form
 class FormModal(Modal):
     def __init__(self):
@@ -592,12 +597,12 @@ class FormModal(Modal):
             reason = self.reason_input.value
 
             # Log form inputs to check the values
-            print(f"Form submitted with the following details:\n"
-                  f"Roblox Username: {roblox_username}\n"
-                  f"Discord Username: {dc_username}\n"
-                  f"Start Date: {loa_start}\n"
-                  f"End Date: {loa_end}\n"
-                  f"Reason: {reason}")
+            logger.info(f"Form submitted with the following details:\n"
+                        f"Roblox Username: {roblox_username}\n"
+                        f"Discord Username: {dc_username}\n"
+                        f"Start Date: {loa_start}\n"
+                        f"End Date: {loa_end}\n"
+                        f"Reason: {reason}")
 
             # Send the form details to the specified channel
             channel = bot.get_channel(1333571422970445955)  # Channel ID here
@@ -615,7 +620,7 @@ class FormModal(Modal):
                 color=discord.Color.green()
             )
             await channel.send(embed=embed)
-            print("Embed sent to the channel successfully.")
+            logger.info("Embed sent to the channel successfully.")
 
             # Send a confirmation response to the user
             await interaction.response.send_message(
@@ -625,7 +630,7 @@ class FormModal(Modal):
             )
         except Exception as e:
             # Catch and log any exceptions that occur during the submission process
-            print(f"Error occurred during form submission: {e}")
+            logger.error(f"Error occurred during form submission: {e}")
             await interaction.response.send_message(f"Something went wrong: {str(e)}", ephemeral=True)
 
 # Command to trigger the form modal
@@ -636,6 +641,9 @@ async def loa_command(interaction: discord.Interaction):
         modal = FormModal()
         await interaction.response.send_modal(modal)
     except Exception as e:
-        print(f"Error occurred while sending the modal: {e}")
+        logger.error(f"Error occurred while sending the modal: {e}")
         await interaction.response.send_message("There was an issue opening the form. Please try again later.", ephemeral=True)
+
+
+
 bot.run(TOKEN)
