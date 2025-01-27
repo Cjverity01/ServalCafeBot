@@ -562,8 +562,6 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
 
 
 
-# Your bot initialization
-bot = commands.Bot(command_prefix="!")
 
 # Define the Modal Form for LOA submission
 class FormModal(Modal):
