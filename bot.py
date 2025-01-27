@@ -584,41 +584,58 @@ class FormModal(Modal):
 
     async def callback(self, interaction: discord.Interaction):
         try:
+            # Retrieve values from the form inputs
             roblox_username = self.robloxuser_input.value
             dc_username = self.dcuser_input.value
             loa_start = self.start_input.value
             loa_end = self.end_input.value
             reason = self.reason_input.value
 
+            # Log form inputs to check the values
+            print(f"Form submitted with the following details:\n"
+                  f"Roblox Username: {roblox_username}\n"
+                  f"Discord Username: {dc_username}\n"
+                  f"Start Date: {loa_start}\n"
+                  f"End Date: {loa_end}\n"
+                  f"Reason: {reason}")
+
             # Send the form details to the specified channel
             channel = bot.get_channel(1333571422970445955)  # Channel ID here
-            if channel:
-                embed = discord.Embed(
-                    title="Someone Has Requested an LOA",
-                    description=f"<@{interaction.user.id}> has requested an LOA.\n\n**Form Details:**\n"
-                                f"**Roblox Username:** {roblox_username}\n"
-                                f"**Discord Username:** {dc_username}\n"
-                                f"**Start Date:** {loa_start}\n"
-                                f"**End Date:** {loa_end}\n"
-                                f"**Reason:** {reason}",
-                    color=discord.Color.green()
-                )
-                await channel.send(embed=embed)
+            if not channel:
+                raise ValueError("Channel not found")
+            
+            embed = discord.Embed(
+                title="Someone Has Requested an LOA",
+                description=f"<@{interaction.user.id}> has requested an LOA.\n\n**Form Details:**\n"
+                            f"**Roblox Username:** {roblox_username}\n"
+                            f"**Discord Username:** {dc_username}\n"
+                            f"**Start Date:** {loa_start}\n"
+                            f"**End Date:** {loa_end}\n"
+                            f"**Reason:** {reason}",
+                color=discord.Color.green()
+            )
+            await channel.send(embed=embed)
+            print("Embed sent to the channel successfully.")
 
             # Send a confirmation response to the user
             await interaction.response.send_message(
-                f"Form submitted!\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\n"
+                f"Form submitted successfully!\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\n"
                 f"Start Date: {loa_start}\nEnd Date: {loa_end}\nReason: {reason}",
                 ephemeral=True
             )
         except Exception as e:
-            # Handle any errors and send a message to the user
+            # Catch and log any exceptions that occur during the submission process
+            print(f"Error occurred during form submission: {e}")
             await interaction.response.send_message(f"Something went wrong: {str(e)}", ephemeral=True)
 
 # Command to trigger the form modal
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
-    # Show the form to the user
-    modal = FormModal()
-    await interaction.response.send_modal(modal)
+    try:
+        # Show the form to the user
+        modal = FormModal()
+        await interaction.response.send_modal(modal)
+    except Exception as e:
+        print(f"Error occurred while sending the modal: {e}")
+        await interaction.response.send_message("There was an issue opening the form. Please try again later.", ephemeral=True)
 bot.run(TOKEN)
