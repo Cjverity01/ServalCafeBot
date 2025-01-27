@@ -654,9 +654,15 @@ class FormModal(Modal):
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
     try:
+        # Log that the command was triggered
+        print(f"Command '/request-loa' triggered by {interaction.user}.")
+        
         # Pass the bot instance to the FormModal
         modal = FormModal(bot)
         await interaction.response.send_modal(modal)
+        
+        # Log modal sent
+        print("Modal sent successfully.")
     except Exception as e:
         # Log any error when opening the modal
         import traceback
@@ -666,4 +672,5 @@ async def loa_command(interaction: discord.Interaction):
             f"An error occurred while processing your request: {e}",
             ephemeral=True
         )
+
 bot.run(TOKEN)
