@@ -1,0 +1,11 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+[packages]
+"discord.py" = {version = "==2.3.2", extras = ["speed"]}
+python-dotenv = "==1.0.0"
+[scripts]
+bot = "python bot.py"
