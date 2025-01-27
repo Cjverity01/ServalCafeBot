@@ -590,12 +590,25 @@ class FormModal(Modal):
             loa_end = self.end_input.value
             reason = self.reason_input.value
 
-            # Log the input values (for debugging purposes)
-            print(f"Form Submitted:\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\nStart Date: {loa_start}\nEnd Date: {loa_end}\nReason: {reason}")
+            # Send the form details to the specified channel
+            channel = bot.get_channel(1333571422970445955)  # Channel ID here
+            if channel:
+                embed = discord.Embed(
+                    title="Someone Has Requested an LOA",
+                    description=f"<@{interaction.user.id}> has requested an LOA.\n\n**Form Details:**\n"
+                                f"**Roblox Username:** {roblox_username}\n"
+                                f"**Discord Username:** {dc_username}\n"
+                                f"**Start Date:** {loa_start}\n"
+                                f"**End Date:** {loa_end}\n"
+                                f"**Reason:** {reason}",
+                    color=discord.Color.green()
+                )
+                await channel.send(embed=embed)
 
-            # Send the response back to the user
+            # Send a confirmation response to the user
             await interaction.response.send_message(
-                f"Form submitted!\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\nStart Date: {loa_start}\nEnd Date: {loa_end}\nReason: {reason}",
+                f"Form submitted!\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\n"
+                f"Start Date: {loa_start}\nEnd Date: {loa_end}\nReason: {reason}",
                 ephemeral=True
             )
         except Exception as e:
