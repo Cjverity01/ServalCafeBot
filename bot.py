@@ -563,19 +563,16 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
 
 
 
-# Define the Modal Form for LOA submission
 class FormModal(Modal):
     def __init__(self):
-        super().__init__(title="LOA Submission Form")
+        super().__init__(title="LOA Form Submission")
 
         # Add the text input fields to the modal
-        self.robloxuser_input = TextInput(label="What is your Roblox username?", placeholder="Gamingwithcj2011")
-        self.dcuser_input = TextInput(label="What Is Your Discord Username?", placeholder="cj_daboi36")
-        self.start_input = TextInput(label="When does your LOA start?", placeholder="01/02/25")
-        self.end_input = TextInput(label="When does your LOA end?", placeholder="15/02/25")
-        self.reason_input = TextInput(label="Why are you requesting this LOA?", placeholder="I am taking a break from Roblox.")
-        self.emg_input = TextInput(label="Is it an emergency?", placeholder="No")
-        self.recently_input = TextInput(label="Have you had an LOA recently?", placeholder="No, I have not had one for a while.")
+        self.robloxuser_input = TextInput(label="Roblox Username", placeholder="Gameingwithcj2011")
+        self.dcuser_input = TextInput(label="Discord Username", placeholder="cj_daboi36")
+        self.start_input = TextInput(label="LOA Start Date", placeholder="01/02/25")
+        self.end_input = TextInput(label="LOA End Date", placeholder="15/02/25")
+        self.reason_input = TextInput(label="Reason for LOA", placeholder="Taking a break")
 
         # Add inputs to the modal
         self.add_item(self.robloxuser_input)
@@ -583,102 +580,21 @@ class FormModal(Modal):
         self.add_item(self.start_input)
         self.add_item(self.end_input)
         self.add_item(self.reason_input)
-        self.add_item(self.emg_input)
-        self.add_item(self.recently_input)
 
     async def callback(self, interaction: discord.Interaction):
+        # Send a response back to the user with their form data
         roblox_username = self.robloxuser_input.value
         dc_username = self.dcuser_input.value
-        start_date = self.start_input.value
-        end_date = self.end_input.value
+        loa_start = self.start_input.value
+        loa_end = self.end_input.value
         reason = self.reason_input.value
-        is_emergency = self.emg_input.value
-        recently_taken_loa = self.recently_input.value
-        
-        # Construct the embed to be sent to a set channel
-        embed = discord.Embed(
-            title="Someone Has Requested an LOA",
-            description=f"<@{interaction.user.id}> has requested an LOA. Here is the form:",
-            color=discord.Color.green()
-        )
-        embed.add_field(name="Roblox Username", value=roblox_username, inline=True)
-        embed.add_field(name="Discord Username", value=dc_username, inline=True)
-        embed.add_field(name="LOA Start Date", value=start_date, inline=True)
-        embed.add_field(name="LOA End Date", value=end_date, inline=True)
-        embed.add_field(name="Reason", value=reason, inline=False)
-        embed.add_field(name="Emergency?", value=is_emergency, inline=True)
-        embed.add_field(name="Had recent LOA?", value=recently_taken_loa, inline=True)
 
-        # Create the "Accept" button
-        accept_button = Button(label="Accept", style=discord.ButtonStyle.green)
-        # Create the "Decline" button
-        decline_button = Button(label="Decline", style=discord.ButtonStyle.red)
+        await interaction.response.send_message(f"Form submitted!\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\nStart Date: {loa_start}\nEnd Date: {loa_end}\nReason: {reason}", ephemeral=True)
 
-        # Define a View to hold the buttons
-        view = View()
-        view.add_item(accept_button)
-        view.add_item(decline_button)
-
-        # Send the embed and the buttons to the set channel
-        channel = bot.get_channel(SET_CHANNEL_ID)  # Replace with the actual channel ID
-        await channel.send(content="@everyone", embed=embed, view=view)
-
-        # Interaction response to the user
-        await interaction.response.send_message("Your LOA request has been submitted.", ephemeral=True)
-
-        # When the "Accept" button is clicked
-        async def on_accept_button_click(interaction: discord.Interaction):
-            # Send a DM to the user who requested the LOA
-            dm_embed = discord.Embed(
-                title="LOA Accepted",
-                description=f"Hey <@{interaction.user.id}>! Your LOA has been accepted and will start on {start_date} and end on {end_date}.",
-                color=discord.Color.green()
-            )
-            await interaction.user.send(embed=dm_embed)
-
-            # Confirm acceptance in the channel
-            await interaction.response.send_message(f"LOA request from <@{interaction.user.id}> has been accepted!", ephemeral=True)
-
-        accept_button.callback = on_accept_button_click
-
-        # When the "Decline" button is clicked
-        async def on_decline_button_click(interaction: discord.Interaction):
-            # Create a new modal for the decline reason
-            decline_modal = DeclineReasonModal()
-            await interaction.response.send_modal(decline_modal)
-
-        decline_button.callback = on_decline_button_click
-
-# Define the Modal Form for Decline reason
-class DeclineReasonModal(Modal):
-    def __init__(self):
-        super().__init__(title="Reason for Declining LOA")
-
-        # Add the text input field for the reason
-        self.decline_reason_input = TextInput(label="Why is this LOA declined?", placeholder="Reason for declining the LOA.")
-        self.add_item(self.decline_reason_input)
-
-    async def callback(self, interaction: discord.Interaction):
-        decline_reason = self.decline_reason_input.value
-
-        # Send a DM to the user with the decline message
-        dm_embed = discord.Embed(
-            title="Your LOA Was Rejected",
-            description=f"Hey <@{interaction.user.id}>! Your LOA was rejected and the reason is: ``{decline_reason}``.",
-            color=discord.Color.red()
-        )
-        await interaction.user.send(embed=dm_embed)
-
-        # Confirm the rejection in the channel
-        await interaction.response.send_message(f"LOA request from <@{interaction.user.id}> has been rejected.", ephemeral=True)
-
-# Command that triggers the LOA form submission
-@bot.tree.command(name="request-loa", description="Submit an LOA request")
+# Command to trigger the form modal
+@bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
-    # Trigger the modal to be shown to the user
+    # Show the form to the user
     modal = FormModal()
     await interaction.response.send_modal(modal)
-
-
-
 bot.run(TOKEN)
