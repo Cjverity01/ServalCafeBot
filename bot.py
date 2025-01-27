@@ -568,13 +568,14 @@ class FormModal(Modal):
         super().__init__(title="LOA Form Submission")
         self.bot = bot
 
-        # Add the text input fields to the modal
+        # Add text input fields
         self.robloxuser_input = TextInput(label="Roblox Username", placeholder="Gameingwithcj2011")
         self.dcuser_input = TextInput(label="Discord Username", placeholder="cj_daboi36")
         self.start_input = TextInput(label="LOA Start Date (DD/MM/YY)", placeholder="01/02/25")
         self.end_input = TextInput(label="LOA End Date (DD/MM/YY)", placeholder="15/02/25")
         self.reason_input = TextInput(label="Reason for LOA", placeholder="Taking a break")
 
+        # Add items to the modal
         self.add_item(self.robloxuser_input)
         self.add_item(self.dcuser_input)
         self.add_item(self.start_input)
@@ -589,6 +590,13 @@ class FormModal(Modal):
             loa_start = self.start_input.value.strip()
             loa_end = self.end_input.value.strip()
             reason = self.reason_input.value.strip()
+
+            # Debug logs for values
+            print(f"Roblox Username: {roblox_username}")
+            print(f"Discord Username: {dc_username}")
+            print(f"LOA Start Date: {loa_start}")
+            print(f"LOA End Date: {loa_end}")
+            print(f"Reason: {reason}")
 
             # Validate inputs
             if not all([roblox_username, dc_username, loa_start, loa_end, reason]):
@@ -605,6 +613,9 @@ class FormModal(Modal):
             channel = self.bot.get_channel(1333571422970445955)
             if not channel:
                 raise ValueError("Could not find the specified channel. Check the channel ID.")
+
+            # Debug log for channel
+            print(f"Channel: {channel.name} (ID: {channel.id})")
 
             # Create and send the embed
             embed = discord.Embed(
@@ -627,6 +638,8 @@ class FormModal(Modal):
             )
 
         except Exception as e:
+            # Log the exception with more detail
+            print(f"Error during modal submission: {e}")
             # Inform the user of the error
             await interaction.response.send_message(
                 f"Something went wrong: {e}. Please try again.",
@@ -641,11 +654,10 @@ async def loa_command(interaction: discord.Interaction):
         modal = FormModal(bot)
         await interaction.response.send_modal(modal)
     except Exception as e:
+        # Log any error when opening the modal
+        print(f"Error occurred while sending the modal: {e}")
         await interaction.response.send_message(
             f"An error occurred while processing your request: {e}",
             ephemeral=True
         )
-
-
-
 bot.run(TOKEN)
