@@ -583,74 +583,74 @@ class FormModal(Modal):
         self.add_item(self.start_input)
         self.add_item(self.end_input)
         self.add_item(self.reason_input)
-async def callback(self, interaction: discord.Interaction):
-    try:
-        # Retrieve input values from the modal
-        roblox_username = self.robloxuser_input.value.strip()
-        dc_username = self.dcuser_input.value.strip()
-        loa_start = self.start_input.value.strip()
-        loa_end = self.end_input.value.strip()
-        reason = self.reason_input.value.strip()
 
-        # Debug logs for values
-        print(f"Roblox Username: {roblox_username}")
-        print(f"Discord Username: {dc_username}")
-        print(f"LOA Start Date: {loa_start}")
-        print(f"LOA End Date: {loa_end}")
-        print(f"Reason: {reason}")
-
-        # Validate inputs
-        if not all([roblox_username, dc_username, loa_start, loa_end, reason]):
-            raise ValueError("All fields must be filled out.")
-
-        # Validate date formats (basic validation)
+    async def callback(self, interaction: discord.Interaction):
         try:
-            datetime.strptime(loa_start, "%d/%m/%y")
-            datetime.strptime(loa_end, "%d/%m/%y")
-        except ValueError:
-            raise ValueError("Dates must be in the format DD/MM/YY.")
+            # Retrieve input values from the modal
+            roblox_username = self.robloxuser_input.value.strip()
+            dc_username = self.dcuser_input.value.strip()
+            loa_start = self.start_input.value.strip()
+            loa_end = self.end_input.value.strip()
+            reason = self.reason_input.value.strip()
 
-        # Retrieve the channel
-        channel = self.bot.get_channel(1333571422970445955)
-        if not channel:
-            raise ValueError("Could not find the specified channel. Check the channel ID.")
+            # Debug logs for values
+            print(f"Roblox Username: {roblox_username}")
+            print(f"Discord Username: {dc_username}")
+            print(f"LOA Start Date: {loa_start}")
+            print(f"LOA End Date: {loa_end}")
+            print(f"Reason: {reason}")
 
-        # Debug log for channel
-        print(f"Channel: {channel.name} (ID: {channel.id})")
+            # Validate inputs
+            if not all([roblox_username, dc_username, loa_start, loa_end, reason]):
+                raise ValueError("All fields must be filled out.")
 
-        # Create and send the embed
-        embed = discord.Embed(
-            title="Someone Has Requested an LOA",
-            description=f"<@{interaction.user.id}> has requested an LOA.\n\n"
-                        f"**Form Details:**\n"
-                        f"**Roblox Username:** {roblox_username}\n"
-                        f"**Discord Username:** {dc_username}\n"
-                        f"**Start Date:** {loa_start}\n"
-                        f"**End Date:** {loa_end}\n"
-                        f"**Reason:** {reason}",
-            color=discord.Color.green()
-        )
+            # Validate date formats (basic validation)
+            try:
+                datetime.strptime(loa_start, "%d/%m/%y")
+                datetime.strptime(loa_end, "%d/%m/%y")
+            except ValueError:
+                raise ValueError("Dates must be in the format DD/MM/YY.")
 
-        # Send the embed to the channel
-        await channel.send(embed=embed)
+            # Retrieve the channel
+            channel = self.bot.get_channel(1333571422970445955)  # Replace with your channel ID
+            if not channel:
+                raise ValueError("Could not find the specified channel. Check the channel ID.")
 
-        # Confirm to the user that their form was submitted successfully
-        await interaction.response.send_message(
-            "Form submitted successfully! Thank you for your request.",
-            ephemeral=True
-        )
+            # Debug log for channel
+            print(f"Channel: {channel.name} (ID: {channel.id})")
 
-    except Exception as e:
-        # Log the exception with more detail
-        print(f"Error during modal submission: {e}")
-        # Inform the user of the error
-        await interaction.response.send_message(
-            f"Something went wrong: {e}. Please try again.",
-            ephemeral=True
-        )
+            # Create and send the embed
+            embed = discord.Embed(
+                title="Someone Has Requested an LOA",
+                description=f"<@{interaction.user.id}> has requested an LOA.\n\n"
+                            f"**Form Details:**\n"
+                            f"**Roblox Username:** {roblox_username}\n"
+                            f"**Discord Username:** {dc_username}\n"
+                            f"**Start Date:** {loa_start}\n"
+                            f"**End Date:** {loa_end}\n"
+                            f"**Reason:** {reason}",
+                color=discord.Color.green()
+            )
+            await channel.send(embed=embed)
 
+            # Confirm to the user that their form was submitted successfully
+            await interaction.response.send_message(
+                "Form submitted successfully! Thank you for your request.",
+                ephemeral=True
+            )
 
+        except Exception as e:
+            # Log the exception with more detail
+            import traceback
+            error_details = traceback.format_exc()  # Capture full traceback
+            print(f"Error during modal submission: {error_details}")
+            # Inform the user of the error
+            await interaction.response.send_message(
+                f"Something went wrong: {e}. Please try again.",
+                ephemeral=True
+            )
 
+# Slash command to open the modal
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
     try:
@@ -659,7 +659,9 @@ async def loa_command(interaction: discord.Interaction):
         await interaction.response.send_modal(modal)
     except Exception as e:
         # Log any error when opening the modal
-        print(f"Error occurred while sending the modal: {e}")
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error occurred while sending the modal: {error_details}")
         await interaction.response.send_message(
             f"An error occurred while processing your request: {e}",
             ephemeral=True
