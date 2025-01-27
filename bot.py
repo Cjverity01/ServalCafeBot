@@ -565,6 +565,24 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
         await interaction.response.send_message("I don't have permission to timeout this user.", ephemeral=True)
     except Exception as e:
         await interaction.response.send_message(f"Failed to timeout {user.name}. Error: {e}", ephemeral=True)
+class FormModal(Modal):
+    def __init__(self, bot):
+        super().__init__(title="LOA Form Submission")
+        self.bot = bot
+
+        # Add text input fields
+        self.robloxuser_input = TextInput(label="Roblox Username", placeholder="Gameingwithcj2011")
+        self.dcuser_input = TextInput(label="Discord Username", placeholder="cj_daboi36")
+        self.start_input = TextInput(label="LOA Start Date (DD/MM/YY)", placeholder="01/02/25")
+        self.end_input = TextInput(label="LOA End Date (DD/MM/YY)", placeholder="15/02/25")
+        self.reason_input = TextInput(label="Reason for LOA", placeholder="Taking a break")
+
+        # Add items to the modal
+        self.add_item(self.robloxuser_input)
+        self.add_item(self.dcuser_input)
+        self.add_item(self.start_input)
+        self.add_item(self.end_input)
+        self.add_item(self.reason_input)
 async def callback(self, interaction: discord.Interaction):
     try:
         # Retrieve input values from the modal
