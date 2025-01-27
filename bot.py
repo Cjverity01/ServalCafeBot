@@ -571,8 +571,8 @@ class FormModal(Modal):
         # Add the text input fields to the modal
         self.robloxuser_input = TextInput(label="Roblox Username", placeholder="Gameingwithcj2011")
         self.dcuser_input = TextInput(label="Discord Username", placeholder="cj_daboi36")
-        self.start_input = TextInput(label="LOA Start Date", placeholder="01/02/25")
-        self.end_input = TextInput(label="LOA End Date", placeholder="15/02/25")
+        self.start_input = TextInput(label="LOA Start Date (DD/MM/YY)", placeholder="01/02/25")
+        self.end_input = TextInput(label="LOA End Date (DD/MM/YY)", placeholder="15/02/25")
         self.reason_input = TextInput(label="Reason for LOA", placeholder="Taking a break")
 
         self.add_item(self.robloxuser_input)
@@ -590,22 +590,21 @@ class FormModal(Modal):
             loa_end = self.end_input.value.strip()
             reason = self.reason_input.value.strip()
 
-            # Log received inputs for debugging
-            logger.info(f"Received inputs: Roblox Username={roblox_username}, Discord Username={dc_username}, "
-                        f"Start Date={loa_start}, End Date={loa_end}, Reason={reason}")
-
             # Validate inputs
             if not all([roblox_username, dc_username, loa_start, loa_end, reason]):
                 raise ValueError("All fields must be filled out.")
 
+            # Validate date formats (basic validation)
+            try:
+                datetime.strptime(loa_start, "%d/%m/%y")
+                datetime.strptime(loa_end, "%d/%m/%y")
+            except ValueError:
+                raise ValueError("Dates must be in the format DD/MM/YY.")
+
             # Retrieve the channel
             channel = self.bot.get_channel(1333571422970445955)
             if not channel:
-                logger.error("Channel not found. Ensure the ID is correct and the bot has access.")
-                raise ValueError("Could not find the specified channel.")
-
-            # Log channel information
-            logger.info(f"Channel found: {channel.name} (ID: {channel.id})")
+                raise ValueError("Could not find the specified channel. Check the channel ID.")
 
             # Create and send the embed
             embed = discord.Embed(
@@ -620,7 +619,6 @@ class FormModal(Modal):
                 color=discord.Color.green()
             )
             await channel.send(embed=embed)
-            logger.info("Embed sent successfully to the channel.")
 
             # Confirm to the user that their form was submitted successfully
             await interaction.response.send_message(
@@ -629,9 +627,6 @@ class FormModal(Modal):
             )
 
         except Exception as e:
-            # Log the exception with traceback
-            logger.error(f"Error during modal submission: {e}", exc_info=True)
-
             # Inform the user of the error
             await interaction.response.send_message(
                 f"Something went wrong: {e}. Please try again.",
@@ -645,9 +640,12 @@ async def loa_command(interaction: discord.Interaction):
         # Pass the bot instance to the FormModal
         modal = FormModal(bot)
         await interaction.response.send_modal(modal)
-        logger.info("Modal sent successfully.")
     except Exception as e:
-        logger.error(f"Error occurred while sending the modal: {e}")
+        await interaction.response.send_message(
+            f"An error occurred while processing your request: {e}",
+            ephemeral=True
+        )
+
 
 
 bot.run(TOKEN)
