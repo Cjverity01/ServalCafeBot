@@ -563,6 +563,7 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
 
 
 
+# Define the Modal Form
 class FormModal(Modal):
     def __init__(self):
         super().__init__(title="LOA Form Submission")
@@ -582,14 +583,24 @@ class FormModal(Modal):
         self.add_item(self.reason_input)
 
     async def callback(self, interaction: discord.Interaction):
-        # Send a response back to the user with their form data
-        roblox_username = self.robloxuser_input.value
-        dc_username = self.dcuser_input.value
-        loa_start = self.start_input.value
-        loa_end = self.end_input.value
-        reason = self.reason_input.value
+        try:
+            roblox_username = self.robloxuser_input.value
+            dc_username = self.dcuser_input.value
+            loa_start = self.start_input.value
+            loa_end = self.end_input.value
+            reason = self.reason_input.value
 
-        await interaction.response.send_message(f"Form submitted!\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\nStart Date: {loa_start}\nEnd Date: {loa_end}\nReason: {reason}", ephemeral=True)
+            # Log the input values (for debugging purposes)
+            print(f"Form Submitted:\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\nStart Date: {loa_start}\nEnd Date: {loa_end}\nReason: {reason}")
+
+            # Send the response back to the user
+            await interaction.response.send_message(
+                f"Form submitted!\nRoblox Username: {roblox_username}\nDiscord Username: {dc_username}\nStart Date: {loa_start}\nEnd Date: {loa_end}\nReason: {reason}",
+                ephemeral=True
+            )
+        except Exception as e:
+            # Handle any errors and send a message to the user
+            await interaction.response.send_message(f"Something went wrong: {str(e)}", ephemeral=True)
 
 # Command to trigger the form modal
 @bot.tree.command(name="request-loa", description="Request an LOA")
