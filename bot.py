@@ -11,7 +11,8 @@ GUILD_ID = os.getenv("GUILD_ID")
 RANKING_ROLE_ID = os.getenv("RANKING_ROLE_ID")
 hex_color = int("86A269", 16)
 # Create the bot instance
-bot = commands.Bot(command_prefix="!", intents=discord.Intents.default().add(discord.Intents.messages))
+bot = commands.Bot(command_prefix="!", intents=discord.Intents.default())
+bot.intents.messages = True
 TOKEN = os.getenv("TOKEN")
 @bot.event
 async def on_ready():
