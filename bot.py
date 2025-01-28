@@ -745,7 +745,7 @@ class LoaForm(Modal, title="Request An LOA"):
                     color=hex_color
                 )
                 await interaction.user.send(embed=embed_accept)
-                await inter.response.send_message("LOA request accepted.", ephemeral=True)
+                await inter.response.send_message("LOA request accepted successfully!", ephemeral=True)
                 collection.update_one(
                     {"user_id": interaction.user.id},
                     {"$set": {"status": "accepted"}}
@@ -782,7 +782,7 @@ class LoaForm(Modal, title="Request An LOA"):
                                 color=hex_color
                             )
                             await interaction.user.send(embed=embed_deny)
-                            await inter_inner.response.send_message("Denial reason submitted and user notified.", ephemeral=True)
+                            await inter_inner.response.send_message("LOA request denied successfully!", ephemeral=True)
                             collection.update_one(
                                 {"user_id": interaction.user.id},
                                 {"$set": {"status": "denied", "denial_reason": self.reason.value}}
