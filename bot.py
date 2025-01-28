@@ -653,7 +653,7 @@ client = MongoClient(mongo_uri)
 db = client["ServalCafe"]
 collection = db["requests"]
 class LoaForm(Modal, title="Request An LOA"):
-    def __init__(self, bot: discord.Bot):
+    def __init__(self, bot: Bot):
         super().__init__(title="Request An LOA")
         self.bot = bot
 
