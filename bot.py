@@ -45,7 +45,7 @@ TOKEN = os.getenv("TOKEN")
 @bot.event
 async def on_ready():
  logger.info("Test")
-   print("---------------------")
+    print("---------------------")
     print("Authors: cj_daboi36.")
     print("---------------------")
     await bot.tree.sync()  # Sync slash commands to Discord
