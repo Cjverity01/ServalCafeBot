@@ -31,8 +31,7 @@ intents.members = True  # Enable the members intent
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Set your hex color for embeds
-hex_color = "#3498db"  # Replace with your desired hex color value
+
 
 # MongoDB setup
 mongo_uri = os.getenv("DATABASE_URI")
