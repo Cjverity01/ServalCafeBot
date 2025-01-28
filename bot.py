@@ -823,8 +823,8 @@ async def deny_callback(inter: discord.Interaction):
     await inter.response.send_modal(DenialReasonModal())
 
 
-        accept_button.callback = accept_callback
-        deny_button.callback = deny_callback
+        accept_button.callback == accept_callback
+        deny_button.callback == deny_callback
 
         view.add_item(accept_button)
         view.add_item(deny_button)
