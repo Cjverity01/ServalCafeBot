@@ -653,7 +653,7 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
 # MongoDB Setup
 client = os.getenv("DATABASE_URI")
 db = client['ServalCafe']
-collection = db['requests']s
+collection = db['requests']
 class LoaForm(Modal, title="Request An LOA"):
     def __init__(self, bot: discord.Bot):
         super().__init__(title="Request An LOA")
