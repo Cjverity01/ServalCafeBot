@@ -628,7 +628,7 @@ class LoaForm(ui.Modal, title="Request An LOA"):
                 f"Something went wrong: {e}. Please try again.",
                 ephemeral=True
             )
-            @bot.tree.command(name="request-loa", description="Request an LOA")
+@bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
     try:
         # Check if the interaction has already been acknowledged
@@ -641,4 +641,5 @@ async def loa_command(interaction: discord.Interaction):
     except Exception as e:
         # Log or handle the error here if needed
         print(f"Error occurred: {e}")
+
 bot.run(TOKEN)
