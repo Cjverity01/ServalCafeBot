@@ -44,7 +44,7 @@ TOKEN = os.getenv("TOKEN")
 
 @bot.event
 async def on_ready():
-logger.info("Test")
+ logger.info("Test")
    print("---------------------")
     print("Authors: cj_daboi36.")
     print("---------------------")
