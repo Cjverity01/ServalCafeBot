@@ -11,6 +11,7 @@ from discord.ui import Modal, TextInput, Button, View
 import logging
 from discord.ext.commands import Bot
 import traceback
+import aiohttp
 from pymongo import MongoClient
 import requests
 import time
