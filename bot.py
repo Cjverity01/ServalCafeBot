@@ -652,7 +652,7 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
         await interaction.response.send_message(f"Failed to timeout {user.name}. Error: {e}", ephemeral=True)
 # MongoDB Setup
 client = os.getenv("DATABASE_URI")
-db = client['ServalCafe']
+db = client["ServalCafe"]
 collection = db['requests']
 class LoaForm(Modal, title="Request An LOA"):
     def __init__(self, bot: discord.Bot):
