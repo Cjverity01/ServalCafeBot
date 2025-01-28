@@ -344,7 +344,7 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
                 if response_rank.status_code == 200:
                     data = response_rank.json()
                     message = data.get("message")
-                    if message == f"The user's rank has been set to {rank}":
+                    if message == f"The user's rank has been set to {rank}!":
                         await interaction.response.send_message(f"Successfully ranked the user!")
                     else:
                         await interaction.response.send_message(f"Error: {message}")
