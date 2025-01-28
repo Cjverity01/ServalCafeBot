@@ -626,10 +626,11 @@ async def unban(interaction: discord.Interaction, user_id: int):
         await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
 
 @bot.tree.command(name="purge", description="Purge a number of messages")  
+await interaction.response.defer()
 async def clear(interaction: discord.Interaction, amount: int):  
-    await interaction.channel.purge(limit=amount)  
     await interaction.response.defer()
-   await interaction.followup.send(f"Purged {amount} messages.", delete_after=5)  
+    await interaction.channel.purge(limit=amount)  
+   await interaction.followup.send(f"Purged {amount} messages.")  
 @bot.tree.command(name="kick", description="Kick a user from the server")
 async def kick(interaction: discord.Interaction, user: discord.Member, reason: str = "No reason provided"):
     guild = await bot.fetch_guild(GUILD_ID)
