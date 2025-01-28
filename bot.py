@@ -566,45 +566,74 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
     except Exception as e:
         await interaction.response.send_message(f"Failed to timeout {user.name}. Error: {e}", ephemeral=True)
 class LoaForm(ui.Modal, title="Request An LOA"):
-     imageId = ui.TextInput(
-        label="Roblox Username",
-        placeholder="Gameingwithcj2011",
-    ),
-    imageId = ui.TextInput(
-        label="Discord Username",
-        placeholder="cj_daboi36",
-    ),
-    ),
-    imageId = ui.TextInput(
-        label="Start Date",
-        placeholder="22/02/25",
-    ),
- imageId = ui.TextInput(
-        label="End Date",
-        placeholder="25/02/25",
-    ),
- imageId = ui.TextInput(
-        label="Reason For Request",
-        placeholder="I want a break",
-    )
-
-    def __init__(self, bot: Bot, **kwargs):
+    def __init__(self, bot: Bot):
+        super().__init__(title="Request An LOA")
         self.bot = bot
-        super().__init__(**kwargs)
+
+        # Add text input fields
+        self.roblox_username = ui.TextInput(
+            label="Roblox Username",
+            placeholder="Gamingwithcj2011"
+        )
+        self.discord_username = ui.TextInput(
+            label="Discord Username",
+            placeholder="cj_daboi36"
+        )
+        self.start_date = ui.TextInput(
+            label="Start Date",
+            placeholder="22/02/25"
+        )
+        self.end_date = ui.TextInput(
+            label="End Date",
+            placeholder="25/02/25"
+        )
+        self.reason = ui.TextInput(
+            label="Reason For Request",
+            placeholder="I want a break"
+        )
+
+        # Add items to the modal
+        self.add_item(self.roblox_username)
+        self.add_item(self.discord_username)
+        self.add_item(self.start_date)
+        self.add_item(self.end_date)
+        self.add_item(self.reason)
 
     async def on_submit(self, interaction: Interaction) -> None:
-        tags = await get_tags()
-        if tags and len(tags) > 0:
-            await interaction.response.send_message("Thank you! We will tell you if it's approved or denied in a few days."),
+        try:
+            # Extract user input from the modal
+            roblox_username = self.roblox_username.value
+            discord_username = self.discord_username.value
+            start_date = self.start_date.value
+            end_date = self.end_date.value
+            reason = self.reason.value
 
-# Slash command to open the modal
+            # Process and respond
+            print(f"Roblox Username: {roblox_username}")
+            print(f"Discord Username: {discord_username}")
+            print(f"Start Date: {start_date}")
+            print(f"End Date: {end_date}")
+            print(f"Reason: {reason}")
+
+            await interaction.response.send_message(
+                "Thank you! We will tell you if it's approved or denied in a few days.",
+                ephemeral=True
+            )
+        except Exception as e:
+            print(f"Error during form submission: {e}")
+            await interaction.response.send_message(
+                f"Something went wrong: {e}. Please try again.",
+                ephemeral=True
+            )
+
+
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
     try:
         # Log that the command was triggered
         print(f"Command '/request-loa' triggered by {interaction.user}.")
         
-        # Pass the bot instance to the FormModal
+        # Pass the bot instance to the LoaForm
         modal = LoaForm(bot)
         await interaction.response.send_modal(modal)
         
