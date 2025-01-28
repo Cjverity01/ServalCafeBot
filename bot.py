@@ -650,10 +650,12 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
         await interaction.response.send_message("I don't have permission to timeout this user.", ephemeral=True)
     except Exception as e:
         await interaction.response.send_message(f"Failed to timeout {user.name}. Error: {e}", ephemeral=True)
-# MongoDB Setup
-client = os.getenv("DATABASE_URI")
+mongo_uri = os.getenv("DATABASE_URI")
+client = MongoClient(mongo_uri)
+
+# Access the database and collection
 db = client["ServalCafe"]
-collection = db['requests']
+collection = db["requests"]
 class LoaForm(Modal, title="Request An LOA"):
     def __init__(self, bot: discord.Bot):
         super().__init__(title="Request An LOA")
