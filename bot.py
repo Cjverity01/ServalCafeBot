@@ -44,8 +44,8 @@ TOKEN = os.getenv("TOKEN")
 
 @bot.event
 async def on_ready():
-    print("Loading...")
-    print("---------------------")
+logger.info("Test")
+   print("---------------------")
     print("Authors: cj_daboi36.")
     print("---------------------")
     await bot.tree.sync()  # Sync slash commands to Discord
@@ -78,6 +78,15 @@ async def on_ready():
 
         # Accept button callback
         async def accept_callback(inter: discord.Interaction):
+            # Check if the request has already been accepted or denied
+            request_data = collection.find_one({"user_id": request['user_id']})
+            if request_data['status'] == 'accepted':
+                await inter.response.send_message(f"Nice try! <@{request['user_id']}> has already accepted this LOA request.", ephemeral=True)
+                return
+            elif request_data['status'] == 'denied':
+                await inter.response.send_message(f"Nice try! <@{request['user_id']}> has already denied this LOA request.", ephemeral=True)
+                return
+
             embed_accept = Embed(
                 title="Your LOA Request Was Accepted",
                 description=(
@@ -96,6 +105,15 @@ async def on_ready():
 
         # Deny button callback
         async def deny_callback(inter: discord.Interaction):
+            # Check if the request has already been accepted or denied
+            request_data = collection.find_one({"user_id": request['user_id']})
+            if request_data['status'] == 'accepted':
+                await inter.response.send_message(f"Nice try! <@{request['user_id']}> has already accepted this LOA request.", ephemeral=True)
+                return
+            elif request_data['status'] == 'denied':
+                await inter.response.send_message(f"Nice try! <@{request['user_id']}> has already denied this LOA request.", ephemeral=True)
+                return
+
             class DenialReasonModal(Modal, title="Denial Reason"):
                 def __init__(self):
                     super().__init__(title="Denial Reason")
