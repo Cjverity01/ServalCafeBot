@@ -1,4 +1,6 @@
 import discord
+from discord import Interaction
+from discord import ui
 from discord.ext import commands
 import time
 from dotenv import load_dotenv
@@ -7,6 +9,7 @@ from datetime import timedelta
 from discord.ui import Modal, TextInput, Button, View
 import traceback
 import logging
+from discord.ext.commands import Bot
 from datetime import datetime
 from discord.ui import Modal, TextInput
 logger = logging.getLogger(__name__)
