@@ -577,7 +577,6 @@ mongo_client = AsyncIOMotorClient(MONGO_URI)
 db = mongo_client["LOA_DB"]  # Replace with your database name
 loa_collection = db["LOA_Requests"]  # Collection to store LOA requests
 button_collection = db["Button_States"]  # Collection to store button states
-
 class LoaForm(Modal, title="Request An LOA"):
     def __init__(self, bot):
         super().__init__(title="Request An LOA")
@@ -596,7 +595,7 @@ class LoaForm(Modal, title="Request An LOA"):
         self.add_item(self.reason)
 
     async def on_submit(self, interaction: Interaction):
-        # Create embed for the request
+        # Create the embed for the LOA request
         embed = Embed(
             title="A LOA Request Has Been Sent In",
             description=f"<@{interaction.user.id}> has requested a LOA!",
@@ -608,7 +607,7 @@ class LoaForm(Modal, title="Request An LOA"):
         embed.add_field(name="End Date", value=self.end_date.value, inline=True)
         embed.add_field(name="Reason", value=self.reason.value, inline=False)
 
-        # Save data to MongoDB
+        # Save the data to MongoDB (status is "pending" initially)
         await collection.insert_one({
             "user_id": interaction.user.id,
             "roblox_username": self.roblox_username.value,
@@ -616,7 +615,7 @@ class LoaForm(Modal, title="Request An LOA"):
             "start_date": self.start_date.value,
             "end_date": self.end_date.value,
             "reason": self.reason.value,
-            "status": "pending"  # Save the status of the LOA request
+            "status": "pending"  # Default status is pending
         })
 
         # Create buttons for Accept/Deny
@@ -634,7 +633,7 @@ class LoaForm(Modal, title="Request An LOA"):
             await interaction.user.send(embed=embed_accept)
             await inter.response.send_message("LOA request accepted.", ephemeral=True)
 
-            # Update the status in MongoDB to "accepted"
+            # Update status in MongoDB to "accepted"
             await collection.update_one(
                 {"user_id": interaction.user.id, "status": "pending"},
                 {"$set": {"status": "accepted"}}
@@ -668,13 +667,16 @@ class LoaForm(Modal, title="Request An LOA"):
         accept_button.callback = accept_callback
         deny_button.callback = deny_callback
 
+        # Add buttons to the view
         view.add_item(accept_button)
         view.add_item(deny_button)
 
-        # Send the embed to the target channel
+        # Send the embed to the log channel with the buttons
         log_channel = self.bot.get_channel(1333571422970445955)  # Replace with your channel ID
         if log_channel:
             await log_channel.send(embed=embed, view=view)
+
+        # Notify the user that their request has been submitted
         await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 # Slash command to trigger the LOA form
 @bot.tree.command(name="request-loa", description="Request an LOA")
