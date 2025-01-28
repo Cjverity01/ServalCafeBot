@@ -728,6 +728,7 @@ class LoaForm(Modal, title="Request An LOA"):
 
         # Accept button callback
        # Accept button callback
+# Accept button callback
 async def accept_callback(inter: discord.Interaction):
     embed_accept = Embed(
         title="Your LOA Request Was Accepted",
@@ -753,26 +754,36 @@ async def accept_callback(inter: discord.Interaction):
         {"$set": {"status": "accepted"}}
     )
 
-        # Deny button callback
-        async def deny_callback(inter: discord.Interaction):
-            loa_request = collection.find_one({"user_id": interaction.user.id})
-            if loa_request:
-                if loa_request["status"] == "accepted":
-                    await inter.response.send_message(f"Nice try! <@{loa_request['user_id']}> already accepted this request.", ephemeral=True)
-                    return
-                elif loa_request["status"] == "denied":
-                    await inter.response.send_message(f"Nice try! <@{loa_request['user_id']}> already denied this request.", ephemeral=True)
-                    return
-                elif loa_request["status"] == "pending":
-                    class DenialReasonModal(Modal, title="Denial Reason"):
-                        def __init__(self):
-                            super().__init__(title="Denial Reason")
-                            self.reason = TextInput(
-                                label="Reason for Denial",
-                                placeholder="Please explain why this LOA request is denied.",
-                                required=True
-                            )
-                            self.add_item(self.reason)
+# Deny button callback
+async def deny_callback(inter: discord.Interaction):
+    class DenialReasonModal(Modal, title="Denial Reason"):
+        def __init__(self):
+            super().__init__(title="Denial Reason")
+            self.reason = TextInput(
+                label="Reason for Denial",
+                placeholder="Please explain why this LOA request is denied.",
+                required=True
+            )
+            self.add_item(self.reason)
+
+        async def on_submit(self, inter_inner: discord.Interaction):
+            embed_deny = Embed(
+                title="Your LOA Request Was Denied",
+                description=(
+                    f"Hey there <@{interaction.user.id}>! "
+                    f"Your LOA request was denied with the reason:\n``{self.reason.value}``."
+                ),
+                color=hex_color  # Using hex_color variable here
+            )
+            await interaction.user.send(embed=embed_deny)
+            await inter_inner.response.send_message("Denial reason submitted and user notified.", ephemeral=True)
+            collection.update_one(
+                {"user_id": interaction.user.id},
+                {"$set": {"status": "denied", "denial_reason": self.reason.value}}
+            )
+
+    await inter.response.send_modal(DenialReasonModal())
+
 
                         async def on_submit(self, inter_inner: discord.Interaction):
                             embed_deny = Embed(
