@@ -307,6 +307,8 @@ async def demote(interaction: discord.Interaction, user: discord.User):
         await interaction.response.send_message("You do not have the required role to demote users.")
 @bot.tree.command(name="rank", description="Rank a user.")
 async def setrank(interaction: discord.Interaction, user: discord.User, rank: str):
+    await interaction.response.defer()  # Defer the response to avoid the 'already acknowledged' error
+    
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
 
@@ -314,7 +316,6 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
         # Debugging: print out the user's role IDs
         print(f"{interaction.user.name} roles: {[role.id for role in member.roles]}")
 
-        # Check if the user has the required role
         if any(role.id == RANKING_ROLE_ID for role in member.roles):
             try:
                 roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
@@ -328,13 +329,13 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
                     data = response_roblox.json()
                     roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
                     if not roblox_id:
-                        await interaction.response.send_message("Could not find a Roblox ID for this user.")
+                        await interaction.followup.send("Could not find a Roblox ID for this user.")
                         return
                 else:
-                    await interaction.response.send_message(f"Failed to fetch Roblox ID. Status Code: {response_roblox.status_code}")
+                    await interaction.followup.send(f"Failed to fetch Roblox ID. Status Code: {response_roblox.status_code}")
                     return
             except Exception as e:
-                await interaction.response.send_message(f"An error occurred while fetching Roblox ID: {e}")
+                await interaction.followup.send(f"An error occurred while fetching Roblox ID: {e}")
                 return
 
             # Second API call to rank the user
@@ -345,17 +346,18 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
                     data = response_rank.json()
                     message = data.get("message")
                     if message == f"The user's rank has been set to {rank}!":
-                        await interaction.response.send_message(f"Successfully ranked the user!")
+                        await interaction.followup.send(f"Successfully ranked the user!")
                     else:
-                        await interaction.response.send_message(f"Error: {message}")
+                        await interaction.followup.send(f"Error: {message}")
                 else:
-                    await interaction.response.send_message(f"Failed to rank user. Status Code: {response_rank.status_code}")
+                    await interaction.followup.send(f"Failed to rank user. Status Code: {response_rank.status_code}")
             except Exception as e:
-                await interaction.response.send_message(f"An error occurred during ranking: {e}")
+                await interaction.followup.send(f"An error occurred during ranking: {e}")
         else:
-            await interaction.response.send_message("You do not have the required role to rank users.")
+            await interaction.followup.send("You do not have the required role to rank users.")
     else:
-        await interaction.response.send_message("Could not fetch the member details.")
+        await interaction.followup.send("Could not fetch the member details.")
+
 
 @bot.tree.command(name="shift", description="Start a shift")
 async def shift(interaction: discord.Interaction):
