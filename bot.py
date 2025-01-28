@@ -638,7 +638,7 @@ class LoaForm(Modal, title="Request An LOA"):
                     f"Your LOA request was accepted and will start on `{self.start_date.value}` "
                     f"and will end on `{self.end_date.value}`."
                 ),
-                color=hex_code
+                color=hex_color
             )
             await interaction.user.send(embed=embed_accept)
             await inter.response.send_message("LOA request accepted.", ephemeral=True)
