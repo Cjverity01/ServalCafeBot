@@ -1,21 +1,15 @@
 import discord
-from discord import Interaction
-from discord import Embed, ButtonStyle, Interaction
+from discord import Interaction, Embed, ButtonStyle
 from discord import ui
 from discord.ext import commands
-from motor.motor_asyncio import AsyncIOMotorClient
-import time
-from dotenv import load_dotenv
+from motor.motor_asyncio import AsyncIOMotorClient  # Correct async MongoDB client
 import os
-from datetime import timedelta
+from dotenv import load_dotenv
+from datetime import datetime, timedelta
 from discord.ui import Modal, TextInput, Button, View
-import traceback
 import logging
 from discord.ext.commands import Bot
-from datetime import datetime
-from discord.ui import Modal, TextInput
-from mongo import collection
-from pymongo import MongoClient
+import traceback
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
