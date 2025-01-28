@@ -309,45 +309,54 @@ async def demote(interaction: discord.Interaction, user: discord.User):
 async def setrank(interaction: discord.Interaction, user: discord.User, rank: str):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
-    if member and any(role.id == RANKING_ROLE_ID for role in member.roles):
-     
-        try:
-            roblox_id = None  # Initialize roblox_id to prevent unbound variable erro
-            # First API call to fetch Roblox ID
-            response_roblox = requests.get(
-                f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",
-                headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
-            )
-            if response_roblox.status_code == 200:
-                data = response_roblox.json()
-                roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
-                if not roblox_id:
-                    await interaction.response.send_message("Could not find a Roblox ID for this user.")
-                    return
-            else:
-                await interaction.response.send_message(f"Failed to fetch Roblox ID. Status Code: {response_roblox.status_code}")
-                return
-        except Exception as e:
-            await interaction.response.send_message(f"An error occurred while fetching Roblox ID: {e}")
-            return
 
-        # Second API call to rank the user
-        full_url = f"https://ranking.cjscommissions.xyz/group/rank/?groupid=16461735&user_id={roblox_id}&role_number={rank}&key=CJSCOMMSRANK"
-        try:
-            response_rank = requests.get(full_url)
-            if response_rank.status_code == 200:
-                data = response_rank.json()
-                message = data.get("message")
-                if message == f"The user's rank has been set to {rank}!":
-                    await interaction.response.send_message(f"Successfully ranked the user!")
+    if member:
+        # Debugging: print out the user's roles
+        roles = [role.name for role in member.roles]
+        print(f"{interaction.user.name} roles: {roles}")
+
+        if any(role.id == RANKING_ROLE_ID for role in member.roles):
+            try:
+                roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
+
+                # First API call to fetch Roblox ID
+                response_roblox = requests.get(
+                    f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",
+                    headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
+                )
+                if response_roblox.status_code == 200:
+                    data = response_roblox.json()
+                    roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
+                    if not roblox_id:
+                        await interaction.response.send_message("Could not find a Roblox ID for this user.")
+                        return
                 else:
-                    await interaction.response.send_message(f"Error: {message}")
-            else:
-                await interaction.response.send_message(f"Failed to rank user. Status Code: {response_rank.status_code}")
-        except Exception as e:
-            await interaction.response.send_message(f"An error occurred during ranking: {e}")
+                    await interaction.response.send_message(f"Failed to fetch Roblox ID. Status Code: {response_roblox.status_code}")
+                    return
+            except Exception as e:
+                await interaction.response.send_message(f"An error occurred while fetching Roblox ID: {e}")
+                return
+
+            # Second API call to rank the user
+            full_url = f"https://ranking.cjscommissions.xyz/group/rank/?groupid=16461735&user_id={roblox_id}&role_number={rank}&key=CJSCOMMSRANK"
+            try:
+                response_rank = requests.get(full_url)
+                if response_rank.status_code == 200:
+                    data = response_rank.json()
+                    message = data.get("message")
+                    if message == f"The user's rank has been set to {rank}!":
+                        await interaction.response.send_message(f"Successfully ranked the user!")
+                    else:
+                        await interaction.response.send_message(f"Error: {message}")
+                else:
+                    await interaction.response.send_message(f"Failed to rank user. Status Code: {response_rank.status_code}")
+            except Exception as e:
+                await interaction.response.send_message(f"An error occurred during ranking: {e}")
+        else:
+            await interaction.response.send_message("You do not have the required role to rank users.")
     else:
-        await interaction.response.send_message("You do not have the required role to rank users.")
+        await interaction.response.send_message("Could not fetch the member details.")
+
 @bot.tree.command(name="shift", description="Start a shift")
 async def shift(interaction: discord.Interaction):
     # Settings for this command
