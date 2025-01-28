@@ -628,7 +628,7 @@ class LoaForm(ui.Modal, title="Request An LOA"):
                 f"Something went wrong: {e}. Please try again.",
                 ephemeral=True
             )
-            @bot.tree.command(name="request-loa", description="Request an LOA")
+@bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
     try:
         # Log that the command was triggered
