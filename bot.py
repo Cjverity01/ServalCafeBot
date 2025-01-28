@@ -222,7 +222,7 @@ async def groupmembers(interaction: discord.Interaction):
     except Exception as e:
         await interaction.response.send_message(f"An error occurred: {e}")
 @bot.tree.command(name="promote", description="Promote a user.")
-async def promote(interaction: discord.Interaction, user: discord.User):
+async def demote(interaction: discord.Interaction, user: discord.User):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
     
