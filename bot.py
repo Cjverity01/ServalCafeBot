@@ -616,7 +616,7 @@ class LoaForm(Modal, title="Request An LOA"):
         embed = Embed(
             title="A LOA Request Has Been Sent In",
             description=f"<@{interaction.user.id}> has requested a LOA!",
-            color=Embed.Color.blue()
+            color=hex_code
         )
         embed.add_field(name="Roblox Username", value=self.roblox_username.value, inline=False)
         embed.add_field(name="Discord Username", value=self.discord_username.value, inline=False)
@@ -638,7 +638,7 @@ class LoaForm(Modal, title="Request An LOA"):
                     f"Your LOA request was accepted and will start on `{self.start_date.value}` "
                     f"and will end on `{self.end_date.value}`."
                 ),
-                color=Embed.Color.green()
+                color=hex_code
             )
             await interaction.user.send(embed=embed_accept)
             await inter.response.send_message("LOA request accepted.", ephemeral=True)
@@ -662,7 +662,7 @@ class LoaForm(Modal, title="Request An LOA"):
                             f"Hey there <@{interaction.user.id}>! "
                             f"Your LOA request was denied with the reason:\n``{self.reason.value}``."
                         ),
-                        color=Embed.Color.red()
+                        color=hex_code
                     )
                     await interaction.user.send(embed=embed_deny)
                     await inter_inner.response.send_message("Denial reason submitted and user notified.", ephemeral=True)
