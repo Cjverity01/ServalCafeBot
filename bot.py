@@ -727,29 +727,31 @@ class LoaForm(Modal, title="Request An LOA"):
         deny_button = Button(label="Deny", style=ButtonStyle.danger)
 
         # Accept button callback
-        async def accept_callback(inter: discord.Interaction):
-            loa_request = collection.find_one({"user_id": interaction.user.id})
-            if loa_request:
-                if loa_request["status"] != "pending":
-                    status = loa_request["status"]
-                    await inter.response.send_message(f"Nuh - uh, <@{interaction.user.id}> has already {status} this LOA request.", ephemeral=True)
-                    return
+       # Accept button callback
+async def accept_callback(inter: discord.Interaction):
+    embed_accept = Embed(
+        title="Your LOA Request Was Accepted",
+        description=(
+            f"Hey there <@{interaction.user.id}>! "
+            f"Your LOA request was accepted and will start on `{self.start_date.value}` "
+            f"and will end on `{self.end_date.value}`."
+        ),
+        color=hex_color  # Using hex_color variable here
+    )
 
-                embed_accept = Embed(
-                    title="Your LOA Request Was Accepted",
-                    description=(
-                        f"Hey there <@{interaction.user.id}>! "
-                        f"Your LOA request was accepted and will start on `{self.start_date.value}` "
-                        f"and will end on `{self.end_date.value}`."
-                    ),
-                    color=hex_color
-                )
-                await interaction.user.send(embed=embed_accept)
-                await inter.response.send_message("LOA request accepted successfully!", ephemeral=True)
-                collection.update_one(
-                    {"user_id": interaction.user.id},
-                    {"$set": {"status": "accepted"}}
-                )
+    try:
+        # Attempt to send the DM
+        await interaction.user.send(embed=embed_accept)
+    except discord.errors.Forbidden:
+        # If DM is closed
+        await inter.response.send_message("LOA request accepted, but the user's DM's are shut.", ephemeral=True)
+        return
+
+    await inter.response.send_message("LOA request accepted successfully.", ephemeral=True)
+    collection.update_one(
+        {"user_id": interaction.user.id},
+        {"$set": {"status": "accepted"}}
+    )
 
         # Deny button callback
         async def deny_callback(inter: discord.Interaction):
