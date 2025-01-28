@@ -755,9 +755,11 @@ class LoaForm(Modal, title="Request An LOA"):
         async def deny_callback(inter: discord.Interaction):
             loa_request = collection.find_one({"user_id": interaction.user.id})
             if loa_request:
-                if loa_request["status"] != "pending":
-                    status = loa_request["status"]
-                    await inter.response.send_message(f"Nuh - uh, <@{interaction.user.id}> has already {status} this LOA request.", ephemeral=True)
+                if loa_request["status"] == "accepted":
+                    await inter.response.send_message(f"Nice try! <@{loa_request['user_id']}> already accepted this request.", ephemeral=True)
+                    return
+                elif loa_request["status"] == "denied":
+                    await inter.response.send_message(f"Nice try! <@{loa_request['user_id']}> already denied this request.", ephemeral=True)
                     return
 
                 class DenialReasonModal(Modal, title="Denial Reason"):
