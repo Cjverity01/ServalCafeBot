@@ -11,6 +11,7 @@ import logging
 from discord.ext.commands import Bot
 import traceback
 from pymongo import MongoClient
+import requests
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
