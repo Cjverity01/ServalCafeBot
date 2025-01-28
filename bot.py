@@ -727,6 +727,13 @@ class LoaForm(Modal, title="Request An LOA"):
 
         # Accept button callback
         async def accept_callback(inter: discord.Interaction):
+            # Check if the LOA has already been accepted or denied
+            loa_request = collection.find_one({"user_id": interaction.user.id})
+            if loa_request and loa_request["status"] != "pending":
+                status = loa_request["status"]
+                await inter.response.send_message(f"Nuh - uh, <@{interaction.user.id}> has already {status} this LOA request.", ephemeral=True)
+                return
+
             embed_accept = Embed(
                 title="Your LOA Request Was Accepted",
                 description=(
@@ -745,6 +752,13 @@ class LoaForm(Modal, title="Request An LOA"):
 
         # Deny button callback
         async def deny_callback(inter: discord.Interaction):
+            # Check if the LOA has already been accepted or denied
+            loa_request = collection.find_one({"user_id": interaction.user.id})
+            if loa_request and loa_request["status"] != "pending":
+                status = loa_request["status"]
+                await inter.response.send_message(f"Nuh - uh, <@{interaction.user.id}> has already {status} this LOA request.", ephemeral=True)
+                return
+
             class DenialReasonModal(Modal, title="Denial Reason"):
                 def __init__(self):
                     super().__init__(title="Denial Reason")
@@ -758,10 +772,8 @@ class LoaForm(Modal, title="Request An LOA"):
                 async def on_submit(self, inter_inner: discord.Interaction):
                     embed_deny = Embed(
                         title="Your LOA Request Was Denied",
-                        description=(
-                            f"Hey there <@{interaction.user.id}>! "
-                            f"Your LOA request was denied with the reason:\n``{self.reason.value}``."
-                        ),
+                        description=(f"Hey there <@{interaction.user.id}>! "
+                                      f"Your LOA request was denied with the reason:\n``{self.reason.value}``."),
                         color=hex_color  # Using hex_color variable here
                     )
                     await interaction.user.send(embed=embed_deny)
