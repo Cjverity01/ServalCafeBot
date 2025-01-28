@@ -594,90 +594,86 @@ class LoaForm(Modal, title="Request An LOA"):
         self.add_item(self.end_date)
         self.add_item(self.reason)
 
-    async def on_submit(self, interaction: Interaction):
-        # Create the embed for the LOA request
-        embed = Embed(
-            title="A LOA Request Has Been Sent In",
-            description=f"<@{interaction.user.id}> has requested a LOA!",
+async def on_submit(self, interaction: discord.Interaction):
+    # Create the embed to send to the log channel
+    embed = Embed(
+        title="A LOA Request Has Been Sent In",
+        description=f"<@{interaction.user.id}> has requested a LOA!",
+        color=hex_color
+    )
+    embed.add_field(name="Roblox Username", value=self.roblox_username.value, inline=False)
+    embed.add_field(name="Discord Username", value=self.discord_username.value, inline=False)
+    embed.add_field(name="Start Date", value=self.start_date.value, inline=True)
+    embed.add_field(name="End Date", value=self.end_date.value, inline=True)
+    embed.add_field(name="Reason", value=self.reason.value, inline=False)
+
+    # Insert the request into MongoDB (without awaiting)
+    collection.insert_one({
+        "roblox_username": self.roblox_username.value,
+        "discord_username": self.discord_username.value,
+        "start_date": self.start_date.value,
+        "end_date": self.end_date.value,
+        "reason": self.reason.value,
+        "user_id": interaction.user.id
+    })
+
+    # Create buttons for Accept/Deny
+    view = View()
+    accept_button = Button(label="Accept", style=ButtonStyle.success)
+    deny_button = Button(label="Deny", style=ButtonStyle.danger)
+
+    # Accept button callback
+    async def accept_callback(inter: Interaction):
+        embed_accept = Embed(
+            title="Your LOA Request Was Accepted",
+            description=(
+                f"Hey there <@{interaction.user.id}>! "
+                f"Your LOA request was accepted and will start on `{self.start_date.value}` "
+                f"and will end on `{self.end_date.value}`."
+            ),
             color=hex_color
         )
-        embed.add_field(name="Roblox Username", value=self.roblox_username.value, inline=False)
-        embed.add_field(name="Discord Username", value=self.discord_username.value, inline=False)
-        embed.add_field(name="Start Date", value=self.start_date.value, inline=True)
-        embed.add_field(name="End Date", value=self.end_date.value, inline=True)
-        embed.add_field(name="Reason", value=self.reason.value, inline=False)
+        await interaction.user.send(embed=embed_accept)
+        await inter.response.send_message("LOA request accepted.", ephemeral=True)
 
-        # Save the data to MongoDB (status is "pending" initially)
-        await collection.insert_one({
-            "user_id": interaction.user.id,
-            "roblox_username": self.roblox_username.value,
-            "discord_username": self.discord_username.value,
-            "start_date": self.start_date.value,
-            "end_date": self.end_date.value,
-            "reason": self.reason.value,
-            "status": "pending"  # Default status is pending
-        })
+    # Deny button callback
+    async def deny_callback(inter: Interaction):
+        class DenialReasonModal(Modal, title="Denial Reason"):
+            def __init__(self):
+                super().__init__(title="Denial Reason")
+                self.reason = TextInput(
+                    label="Reason for Denial",
+                    placeholder="Please explain why this LOA request is denied.",
+                    required=True
+                )
+                self.add_item(self.reason)
 
-        # Create buttons for Accept/Deny
-        view = View()
-        accept_button = Button(label="Accept", style=ButtonStyle.success)
-        deny_button = Button(label="Deny", style=ButtonStyle.danger)
+            async def on_submit(self, inter_inner: Interaction):
+                embed_deny = Embed(
+                    title="Your LOA Request Was Denied",
+                    description=(
+                        f"Hey there <@{interaction.user.id}>! "
+                        f"Your LOA request was denied with the reason:\n``{self.reason.value}``."
+                    ),
+                    color=hex_color
+                )
+                await interaction.user.send(embed=embed_deny)
+                await inter_inner.response.send_message("Denial reason submitted and user notified.", ephemeral=True)
 
-        # Accept button callback
-        async def accept_callback(inter: Interaction):
-            embed_accept = Embed(
-                title="Your LOA Request Was Accepted",
-                description=f"Hey there <@{interaction.user.id}>! Your LOA request was accepted and will start on `{self.start_date.value}` and will end on `{self.end_date.value}`.",
-                color=hex_color
-            )
-            await interaction.user.send(embed=embed_accept)
-            await inter.response.send_message("LOA request accepted.", ephemeral=True)
+        await inter.response.send_modal(DenialReasonModal())
 
-            # Update status in MongoDB to "accepted"
-            await collection.update_one(
-                {"user_id": interaction.user.id, "status": "pending"},
-                {"$set": {"status": "accepted"}}
-            )
+    accept_button.callback = accept_callback
+    deny_button.callback = deny_callback
 
-        # Deny button callback
-        async def deny_callback(inter: Interaction):
-            class DenialReasonModal(Modal, title="Denial Reason"):
-                def __init__(self):
-                    super().__init__(title="Denial Reason")
-                    self.reason = TextInput(label="Reason for Denial", placeholder="Please explain why this LOA request is denied.", required=True)
-                    self.add_item(self.reason)
+    view.add_item(accept_button)
+    view.add_item(deny_button)
 
-                async def on_submit(self, inter_inner: Interaction):
-                    embed_deny = Embed(
-                        title="Your LOA Request Was Denied",
-                        description=f"Hey there <@{interaction.user.id}>! Your LOA request was denied with the reason:\n``{self.reason.value}``.",
-                        color=hex_color
-                    )
-                    await interaction.user.send(embed=embed_deny)
-                    await inter_inner.response.send_message("Denial reason submitted and user notified.", ephemeral=True)
+    # Send the embed to the target channel
+    log_channel = self.bot.get_channel(1333571422970445955)  # Replace with your channel ID
+    if log_channel:
+        await log_channel.send(embed=embed, view=view)
+    await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 
-                    # Update the status in MongoDB to "denied"
-                    await collection.update_one(
-                        {"user_id": interaction.user.id, "status": "pending"},
-                        {"$set": {"status": "denied", "denial_reason": self.reason.value}}
-                    )
-
-            await inter.response.send_modal(DenialReasonModal())
-
-        accept_button.callback = accept_callback
-        deny_button.callback = deny_callback
-
-        # Add buttons to the view
-        view.add_item(accept_button)
-        view.add_item(deny_button)
-
-        # Send the embed to the log channel with the buttons
-        log_channel = self.bot.get_channel(1333571422970445955)  # Replace with your channel ID
-        if log_channel:
-            await log_channel.send(embed=embed, view=view)
-
-        # Notify the user that their request has been submitted
-        await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 # Slash command to trigger the LOA form
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
