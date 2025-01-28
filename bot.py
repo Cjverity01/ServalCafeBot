@@ -222,19 +222,19 @@ async def groupmembers(interaction: discord.Interaction):
     except Exception as e:
         await interaction.response.send_message(f"An error occurred: {e}")
 @bot.tree.command(name="promote", description="Promote a user.")
-async def demote(interaction: discord.Interaction, user: discord.User):
+async def promote(interaction: discord.Interaction, user: discord.User):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
-    
-    if member and any(role.id == RANKING_ROLE_ID for role in member.roles):  # Check if user has the required role
-        roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
+
+    if member and any(role.id == RANKING_ROLE_ID for role in member.roles):
+        roblox_id = None
         try:
-            # First API call to fetch Roblox ID
+            # Fetch Roblox ID
             response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}", 
-                                    headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
+                                    headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
             if response.status_code == 200:
                 data = response.json()
-                roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
+                roblox_id = data.get("robloxID")
                 if not roblox_id:
                     await interaction.response.send_message("Could not find a Roblox ID for this user.")
                     return
@@ -245,35 +245,39 @@ async def demote(interaction: discord.Interaction, user: discord.User):
             await interaction.response.send_message(f"An error occurred while fetching Roblox ID: {e}")
             return
 
-        # Second API call to promote the user
-        full_url = f"https://ranking.cjscommissions.xyz/group/promote/?groupid=16461735&user_id={roblox_id}&key=CJSCOMMSRANK"
+        # Call to promote user
         try:
+            full_url = f"https://ranking.cjscommissions.xyz/group/promote/?groupid=16461735&user_id={roblox_id}&key=CJSCOMMSRANK"
             response = requests.get(full_url)
             if response.status_code == 200:
                 data = response.json()
                 message = data.get("message")
                 if message == "The user was promoted!":
                     await interaction.response.send_message(f"Successfully promoted {user.name}!")
+                else:
+                    await interaction.response.send_message(f"Failed to promote user: {message}")
             else:
                 await interaction.response.send_message(f"Failed to promote user. Status Code: {response.status_code}")
         except Exception as e:
             await interaction.response.send_message(f"An error occurred during promotion: {e}")
+    else:
+        await interaction.response.send_message("You do not have the required role to promote users.")
+
 
 @bot.tree.command(name="demote", description="Demote a user.")
-async def promote(interaction: discord.Interaction, user: discord.User):
+async def demote(interaction: discord.Interaction, user: discord.User):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
-    
-    if member and any(role.id == RANKING_ROLE_ID for role in member.roles):  # Check if user has the required role
-        try:
-            roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
 
-            # First API call to fetch Roblox ID
+    if member and any(role.id == RANKING_ROLE_ID for role in member.roles):
+        roblox_id = None
+        try:
+            # Fetch Roblox ID
             response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",  
-                                    headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
+                                    headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
             if response.status_code == 200:
                 data = response.json()
-                roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
+                roblox_id = data.get("robloxID")
                 if not roblox_id:
                     await interaction.response.send_message("Could not find a Roblox ID for this user.")
                     return
@@ -284,20 +288,23 @@ async def promote(interaction: discord.Interaction, user: discord.User):
             await interaction.response.send_message(f"An error occurred while fetching Roblox ID: {e}")
             return
 
-        # Second API call to demote the user
-        full_url = f"https://ranking.cjscommissions.xyz/group/demote/?groupid=16461735&user_id={roblox_id}&key=CJSCOMMSRANK"
+        # Call to demote user
         try:
+            full_url = f"https://ranking.cjscommissions.xyz/group/demote/?groupid=16461735&user_id={roblox_id}&key=CJSCOMMSRANK"
             response = requests.get(full_url)
             if response.status_code == 200:
                 data = response.json()
                 message = data.get("message")
                 if message == "The user was demoted!":
                     await interaction.response.send_message(f"Successfully demoted {user.name}!")
+                else:
+                    await interaction.response.send_message(f"Failed to demote user: {message}")
             else:
                 await interaction.response.send_message(f"Failed to demote user. Status Code: {response.status_code}")
         except Exception as e:
             await interaction.response.send_message(f"An error occurred during demotion: {e}")
-
+    else:
+        await interaction.response.send_message("You do not have the required role to demote users.")
 @bot.tree.command(name="rank", description="Rank a user.")
 async def setrank(interaction: discord.Interaction, user: discord.User, rank: str):
     guild = await bot.fetch_guild(GUILD_ID)
