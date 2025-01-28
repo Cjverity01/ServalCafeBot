@@ -844,7 +844,7 @@ class LoaForm(Modal, title="Request An LOA"):
         await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 
 @bot.tree.command(name="request-loa", description="Request an LOA")
-async def loa_command(interaction: discord.Interaction):
+async def requestloa(interaction: discord.Interaction):
     modal = LoaForm(bot)
      await interaction.response.send_modal(modal)
   #  await interaction.response.send_message(
