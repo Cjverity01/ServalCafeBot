@@ -633,8 +633,10 @@ async def loa_command(interaction: discord.Interaction):
         # Log that the command was triggered
         print(f"Command '/request-loa' triggered by {interaction.user}.")
         
-        # Pass the bot instance to the LoaForm
+        # Pass the bot instance to the FormModal
         modal = LoaForm(bot)
+        
+        # Send modal to the user (no need for a follow-up message here)
         await interaction.response.send_modal(modal)
         
         # Log modal sent
@@ -644,9 +646,13 @@ async def loa_command(interaction: discord.Interaction):
         import traceback
         error_details = traceback.format_exc()
         print(f"Error occurred while sending the modal: {error_details}")
-        await interaction.response.send_message(
-            f"An error occurred while processing your request: {e}",
-            ephemeral=True
-        )
+        
+        # Send a message only if the interaction hasn't been acknowledged yet
+        if not interaction.response.is_done():
+            await interaction.response.send_message(
+                f"An error occurred while processing your request: {e}",
+                ephemeral=True
+            )
+
 
 bot.run(TOKEN)
