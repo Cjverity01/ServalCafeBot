@@ -311,10 +311,10 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
     member = await guild.fetch_member(interaction.user.id)
 
     if member:
-        # Debugging: print out the user's roles
-        roles = [role.name for role in member.roles]
-        print(f"{interaction.user.name} roles: {roles}")
+        # Debugging: print out the user's role IDs
+        print(f"{interaction.user.name} roles: {[role.id for role in member.roles]}")
 
+        # Check if the user has the required role
         if any(role.id == RANKING_ROLE_ID for role in member.roles):
             try:
                 roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
@@ -352,6 +352,8 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
                     await interaction.response.send_message(f"Failed to rank user. Status Code: {response_rank.status_code}")
             except Exception as e:
                 await interaction.response.send_message(f"An error occurred during ranking: {e}")
+        else:
+            await interaction.response.send_message("You do not have the required role to rank users.")
     else:
         await interaction.response.send_message("Could not fetch the member details.")
 
