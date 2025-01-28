@@ -568,78 +568,73 @@ async def mute(interaction: discord.Interaction, user: discord.Member, duration:
         await interaction.response.send_message("I don't have permission to timeout this user.", ephemeral=True)
     except Exception as e:
         await interaction.response.send_message(f"Failed to timeout {user.name}. Error: {e}", ephemeral=True)
-class LoaForm(ui.Modal, title="Request An LOA"):
-    def __init__(self, bot: Bot):
-        super().__init__(title="Request An LOA")
+class LoaForm(Modal):
+    def __init__(self, bot):
+        super().__init__(title="LOA Request Form")
         self.bot = bot
+        self.add_item(TextInput(label="Start Date (YYYY-MM-DD)", custom_id="start_date"))
+        self.add_item(TextInput(label="End Date (YYYY-MM-DD)", custom_id="end_date"))
 
-        # Add text input fields
-        self.roblox_username = ui.TextInput(
-            label="Roblox Username",
-            placeholder="Gamingwithcj2011"
-        )
-        self.discord_username = ui.TextInput(
-            label="Discord Username",
-            placeholder="cj_daboi36"
-        )
-        self.start_date = ui.TextInput(
-            label="Start Date",
-            placeholder="22/02/25"
-        )
-        self.end_date = ui.TextInput(
-            label="End Date",
-            placeholder="25/02/25"
-        )
-        self.reason = ui.TextInput(
-            label="Reason For Request",
-            placeholder="I want a break"
-        )
+    async def on_submit(self, interaction: discord.Interaction):
+        start_date = self.children[0].value
+        end_date = self.children[1].value
+        channel = interaction.guild.get_channel(1333571422970445955)
 
-        # Add items to the modal
-        self.add_item(self.roblox_username)
-        self.add_item(self.discord_username)
-        self.add_item(self.start_date)
-        self.add_item(self.end_date)
-        self.add_item(self.reason)
+        embed = discord.Embed(
+            title="A LOA Request Has Been Sent In",
+            description=f"<@{interaction.user.id}> has requested a LOA! The form is linked below.",
+            color=discord.Color.blue()
+        ).add_field(name="INFO", value=f"Start Date: {start_date}\nEnd Date: {end_date}")
 
-    async def on_submit(self, interaction: Interaction) -> None:
-        try:
-            # Extract user input from the modal
-            roblox_username = self.roblox_username.value
-            discord_username = self.discord_username.value
-            start_date = self.start_date.value
-            end_date = self.end_date.value
-            reason = self.reason.value
+        accept_button = Button(label="Accept", style=discord.ButtonStyle.green)
+        deny_button = Button(label="Deny", style=discord.ButtonStyle.red)
 
-            # Process and respond
-            print(f"Roblox Username: {roblox_username}")
-            print(f"Discord Username: {discord_username}")
-            print(f"Start Date: {start_date}")
-            print(f"End Date: {end_date}")
-            print(f"Reason: {reason}")
-
-            await interaction.response.send_message(
-                "Thank you! We will tell you if it's approved or denied in a few days.",
-                ephemeral=True
+        async def accept_callback(interaction: discord.Interaction):
+            dm_embed = discord.Embed(
+                title="Your LOA Request Was Accepted",
+                description=(
+                    f"Hey there <@{interaction.user.id}>! Your LOA request was accepted and will start "
+                    f"on `{start_date}` and will end on `{end_date}`."
+                ),
+                color=discord.Color.green()
             )
-        except Exception as e:
-            print(f"Error during form submission: {e}")
-            await interaction.response.send_message(
-                f"Something went wrong: {e}. Please try again.",
-                ephemeral=True
-            )
+            await interaction.user.send(embed=dm_embed)
+            await interaction.response.send_message("The LOA request has been accepted.", ephemeral=True)
+
+        async def deny_callback(interaction: discord.Interaction):
+            modal = Modal(title="Reason for Denial")
+            reason_input = TextInput(label="Reason", placeholder="Enter the reason for denial here.")
+
+            modal.add_item(reason_input)
+
+            async def on_modal_submit(modal_interaction: discord.Interaction):
+                reason = reason_input.value
+                dm_embed = discord.Embed(
+                    title="Your LOA Request Was Denied",
+                    description=(
+                        f"Hey there <@{interaction.user.id}>! Your LOA request was denied with the reason: "
+                        f"`{reason}`."
+                    ),
+                    color=discord.Color.red()
+                )
+                await interaction.user.send(embed=dm_embed)
+                await modal_interaction.response.send_message("The LOA request has been denied.", ephemeral=True)
+
+            modal.on_submit = on_modal_submit
+            await interaction.response.send_modal(modal)
+
+        accept_button.callback = accept_callback
+        deny_button.callback = deny_callback
+
+        view = View()
+        view.add_item(accept_button)
+        view.add_item(deny_button)
+
+        await channel.send(embed=embed, view=view)
+        await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
+
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
-    try:
-        # Check if the interaction has already been acknowledged
-        if not interaction.response.is_done():
-            # Create the modal instance
-            modal = LoaForm(bot)
-            await interaction.response.send_modal(modal)
-        else:
-            print("Interaction already acknowledged.")
-    except Exception as e:
-        # Log or handle the error here if needed
-        print(f"Error occurred: {e}")
-
+    modal = LoaForm(bot)
+    await interaction.response.send_modal(modal)
 bot.run(TOKEN)
