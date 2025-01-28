@@ -229,18 +229,18 @@ async def promote(interaction: discord.Interaction, user: discord.User):
     if member and any(role.id == RANKING_ROLE_ID for role in member.roles):  # Check if user has the required role
         roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
         try:
-            # First API call to fetch Roblox ID using aiohttp for async requests
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}", headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
-                        if not roblox_id:
-                            await interaction.response.send_message("Could not find a Roblox ID for this user.")
-                            return
-                    else:
-                        await interaction.response.send_message(f"Failed to fetch Roblox ID. Status Code: {response.status}")
-                        return
+            # First API call to fetch Roblox ID
+            response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}", 
+                                    headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
+            if response.status_code == 200:
+                data = response.json()
+                roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
+                if not roblox_id:
+                    await interaction.response.send_message("Could not find a Roblox ID for this user.")
+                    return
+            else:
+                await interaction.response.send_message(f"Failed to fetch Roblox ID. Status Code: {response.status_code}")
+                return
         except Exception as e:
             await interaction.response.send_message(f"An error occurred while fetching Roblox ID: {e}")
             return
@@ -248,18 +248,16 @@ async def promote(interaction: discord.Interaction, user: discord.User):
         # Second API call to promote the user
         full_url = f"https://ranking.cjscommissions.xyz/group/promote/?groupid=16461735&user_id={roblox_id}&key=CJSCOMMSRANK"
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(full_url) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        message = data.get("message")
-                        if message == "The user was promoted!":
-                            await interaction.response.send_message(f"Successfully promoted {user.name}!")
-                    else:
-                        await interaction.response.send_message(f"Failed to promote user. Status Code: {response.status}")
+            response = requests.get(full_url)
+            if response.status_code == 200:
+                data = response.json()
+                message = data.get("message")
+                if message == "The user was promoted!":
+                    await interaction.response.send_message(f"Successfully promoted {user.name}!")
+            else:
+                await interaction.response.send_message(f"Failed to promote user. Status Code: {response.status_code}")
         except Exception as e:
             await interaction.response.send_message(f"An error occurred during promotion: {e}")
-
 
 @bot.tree.command(name="demote", description="Demote a user.")
 async def promote(interaction: discord.Interaction, user: discord.User):
@@ -271,7 +269,8 @@ async def promote(interaction: discord.Interaction, user: discord.User):
             roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
 
             # First API call to fetch Roblox ID
-            response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",  headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
+            response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",  
+                                    headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
             if response.status_code == 200:
                 data = response.json()
                 roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
@@ -309,7 +308,8 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
             roblox_id = None  # Initialize roblox_id to prevent unbound variable erro
             # First API call to fetch Roblox ID
             response_roblox = requests.get(
-                f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",  headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
+                f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",
+                headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
             )
             if response_roblox.status_code == 200:
                 data = response_roblox.json()
