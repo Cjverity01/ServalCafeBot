@@ -569,20 +569,20 @@ class LoaForm(ui.Modal, title="Request An LOA"):
      imageId = ui.TextInput(
         label="Roblox Username",
         placeholder="Gameingwithcj2011",
-    )
+    ),
     imageId = ui.TextInput(
         label="Discord Username",
         placeholder="cj_daboi36",
-    )
-    )
+    ),
+    ),
     imageId = ui.TextInput(
         label="Start Date",
         placeholder="22/02/25",
-    )
+    ),
  imageId = ui.TextInput(
         label="End Date",
         placeholder="25/02/25",
-    )
+    ),
  imageId = ui.TextInput(
         label="Reason For Request",
         placeholder="I want a break",
