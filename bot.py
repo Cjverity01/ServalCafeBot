@@ -351,9 +351,7 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
                 else:
                     await interaction.response.send_message(f"Failed to rank user. Status Code: {response_rank.status_code}")
             except Exception as e:
-                await interaction.response.send_message(f"An error occurred during ranking: {e}")
-        else:
-            await interaction.response.send_message("You do not have the required role to rank users.")
+                await interaction.response.send_message(f"An error occurred during ranking: {e}"
     else:
         await interaction.response.send_message("Could not fetch the member details.")
 
