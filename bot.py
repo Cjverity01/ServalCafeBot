@@ -12,6 +12,9 @@ from discord.ext.commands import Bot
 import traceback
 from pymongo import MongoClient
 import requests
+import time
+from datetime import datetime
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
