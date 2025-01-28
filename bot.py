@@ -28,14 +28,21 @@ intents.message_content = True  # Enable message content intent (important for r
 intents.members = True  # Enable the members intent
 
 # Create the bot object and pass intents
+intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+# Set your hex color for embeds
+hex_color = "#3498db"  # Replace with your desired hex color value
+
+# MongoDB setup
 mongo_uri = os.getenv("DATABASE_URI")
 client = MongoClient(mongo_uri)
-
-# Access the database and collection
 db = client["ServalCafe"]
 collection = db["requests"]
+
+# Load token from environment variable
 TOKEN = os.getenv("TOKEN")
+
 @bot.event
 async def on_ready():
     print("Loading...")
@@ -48,7 +55,9 @@ async def on_ready():
     print(f'Loaded! Connected To: {bot.user}')
     print("---------------------")
     print("Started Successfully!")
-       pending_requests = collection.find({"status": "pending"})
+
+    # Fetch pending requests from MongoDB on restart
+    pending_requests = collection.find({"status": "pending"})
     for request in pending_requests:
         user = await bot.fetch_user(request['user_id'])
         
@@ -126,9 +135,7 @@ async def on_ready():
         log_channel = bot.get_channel(1333571422970445955)  # Replace with your channel ID
         if log_channel:
             await log_channel.send(embed=embed, view=view)
-        log_channel = bot.get_channel(1333571422970445955)  # Replace with your channel ID
-        if log_channel:
-            await log_channel.send(embed=embed, view=view)
+
 @bot.tree.command(name="direct-message", description="Send a DM to a user")
 async def dm(interaction: discord.Interaction, user: discord.User, message: str):
     embed = discord.Embed(
