@@ -229,8 +229,7 @@ async def promote(interaction: discord.Interaction, user: discord.User):
         roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
         try:
             # First API call to fetch Roblox ID
-            response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}", 
-                                    headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
+            response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}", headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
             if response.status_code == 200:
                 data = response.json()
                 roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
@@ -268,8 +267,7 @@ async def promote(interaction: discord.Interaction, user: discord.User):
             roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
 
             # First API call to fetch Roblox ID
-            response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",  
-                                    headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
+            response = requests.get(f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",  headers={"Authorization" : "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"})
             if response.status_code == 200:
                 data = response.json()
                 roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
@@ -307,8 +305,7 @@ async def setrank(interaction: discord.Interaction, user: discord.User, rank: st
             roblox_id = None  # Initialize roblox_id to prevent unbound variable erro
             # First API call to fetch Roblox ID
             response_roblox = requests.get(
-                f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",
-                headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
+                f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",  headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
             )
             if response_roblox.status_code == 200:
                 data = response_roblox.json()
