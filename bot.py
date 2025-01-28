@@ -824,6 +824,7 @@ class LoaForm(Modal, title="Request An LOA"):
 
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
-    modal = LoaForm(bot)
-    await interaction.response.send_modal(modal)
+#    modal = LoaForm(bot)
+#    await interaction.response.send_modal(modal)
+await interaction.response.send_message("Due to the recent announcement, you cannot request a LOA. Refer to https://discord.com/channels/1256658894508265494/1257793121048203395/1333761520651337789  for more info.", ephemeral=True)
 bot.run(TOKEN)
