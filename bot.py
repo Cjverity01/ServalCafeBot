@@ -628,34 +628,31 @@ class LoaForm(ui.Modal, title="Request An LOA"):
                 f"Something went wrong: {e}. Please try again.",
                 ephemeral=True
             )
-
-
-@bot.tree.command(name="request-loa", description="Request an LOA")
+            @bot.tree.command(name="request-loa", description="Request an LOA")
 async def loa_command(interaction: discord.Interaction):
     try:
         # Log that the command was triggered
         print(f"Command '/request-loa' triggered by {interaction.user}.")
         
-        # Pass the bot instance to the FormModal
+        # Create the modal instance
         modal = LoaForm(bot)
         
-        # Send modal to the user (no need for a follow-up message here)
+        # Send modal to the user (no follow-up message)
         await interaction.response.send_modal(modal)
         
         # Log modal sent
         print("Modal sent successfully.")
     except Exception as e:
-        # Log any error when opening the modal
+        # Catch any error
         import traceback
         error_details = traceback.format_exc()
         print(f"Error occurred while sending the modal: {error_details}")
         
-        # Send a message only if the interaction hasn't been acknowledged yet
+        # Send a response only if the interaction hasn't been acknowledged yet
         if not interaction.response.is_done():
             await interaction.response.send_message(
-                f"An error occurred while processing your request: {e}",
+                f"An error occurred: {e}",
                 ephemeral=True
             )
-
 
 bot.run(TOKEN)
