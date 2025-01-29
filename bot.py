@@ -851,7 +851,7 @@ async def requestloa(interaction: discord.Interaction):
     )
     #try:
         # Instantiate the modal form
-        modal = LoaForm(bot)
+        #modal = LoaForm(bot)
         
         # Send the modal to the user
        # await interaction.response.send_modal(modal)
