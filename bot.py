@@ -48,15 +48,15 @@ collection = db["requests"]
 @bot.event
 async def on_ready():
     logger.info("Loading...")
-    print("---------------------")
-    print("Authors: cj_daboi36.")
-    print("---------------------")
+    logger.line()
+    logger.info("Authors: cj_daboi36.")
+    logger.line()
     await bot.tree.sync()  # Sync slash commands to Discord
-    print("Slash commands synced")
-    print("---------------------")
-    print(f'Loaded! Connected To: {bot.user}')
-    print("---------------------")
-    print("Started Successfully!")
+    logger.info("Slash commands synced")
+    logger.line()
+    logger.info(f'Loaded! Connected To: {bot.user}')
+    logger.line()
+    logger.info("Started Successfully!")
 
     # Fetch pending requests from MongoDB on restart
     pending_requests = collection.find({"status": "pending"})
