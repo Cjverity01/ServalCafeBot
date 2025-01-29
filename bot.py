@@ -19,6 +19,7 @@ from datetime import datetime
 from discord import app_commands
 import subprocess
 import os
+from discord.ext import commands
 class MyBot(discord.Client):
     def __init__(self):
         super().__init__(intents=discord.Intents.default())
@@ -880,12 +881,12 @@ class MyBot(discord.Client):
 bot = MyBot()
 
 @bot.tree.command(name="restart", description="Restarts the bot.")
-@app_commands.checks.is_owner()  # Only the bot owner can use this
+@commands.is_owner()
 async def restart(interaction: discord.Interaction):
     await interaction.response.send_message("Restarting bot... 🔄", ephemeral=True)
     subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
 @bot.tree.command(name="update", description="Updates the ot to the  most recent version.")
-@app_commands.checks.is_owner()  # Only the bot owner can use this
+@commands.is_owner()
 async def update(interaction: discord.Interaction):
     await interaction.response.send_message("Updating bot... 🔄", ephemeral=True)
 
