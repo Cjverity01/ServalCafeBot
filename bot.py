@@ -879,13 +879,13 @@ class MyBot(discord.Client):
 async def restart(interaction: discord.Interaction):
     await interaction.response.send_message("Restarting bot... 🔄", ephemeral=True)
     subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
-@bot.tree.command(name="update", description="Updates the ot to the  most recent version.")
+@bot.tree.command(name="update", description="Pulls latest code and restarts the bot (Owner only)")
 @commands.is_owner()
 async def update(interaction: discord.Interaction):
     await interaction.response.send_message("Updating bot... 🔄", ephemeral=True)
 
-    # Set Git remote URL (with authentication)
-    subprocess.run(["git", "remote", "set-url", "origin", GIT_AUTH])
+    # Set Git remote to ensure it's correct
+    subprocess.run(["git", "remote", "set-url", "origin", "https://github.com/Cjverity01/ServalCafeBot")
 
     # Pull the latest code
     pull_result = subprocess.run(["git", "pull"], capture_output=True, text=True)
