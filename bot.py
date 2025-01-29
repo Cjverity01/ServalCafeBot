@@ -874,7 +874,6 @@ class MyBot(discord.Client):
         print(f"Logged in as {self.user}")
         await self.tree.sync()  # Sync commands globally (may take some time)
 
-bot = MyBot()
 
 @bot.tree.command(name="restart", description="Restarts the bot.")
 @commands.is_owner()
