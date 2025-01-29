@@ -20,6 +20,7 @@ from discord import app_commands
 import subprocess
 import os
 from discord.ext import commands
+GIT_AUTH = os.getenv("GIT_AUTH")
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 load_dotenv()
