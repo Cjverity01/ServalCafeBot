@@ -47,7 +47,7 @@ collection = db["requests"]
 
 @bot.event
 async def on_ready():
-    print("Loading...")
+    logger.info("Loading...")
     print("---------------------")
     print("Authors: cj_daboi36.")
     print("---------------------")
