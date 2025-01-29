@@ -862,5 +862,37 @@ async def requestloa(interaction: discord.Interaction):
             #"An error occurred while processing your request. Please try again later.", 
             #ephemeral=True
         #)
+class MyBot(discord.Client):
+    def __init__(self):
+        super().__init__(intents=discord.Intents.default())
+        self.tree = app_commands.CommandTree(self)
+
+    async def on_ready(self):
+        print(f"Logged in as {self.user}")
+        await self.tree.sync()  # Sync commands globally (may take some time)
+
+bot = MyBot()
+
+@bot.tree.command(name="restart", description="Restarts the bot.")
+@app_commands.checks.is_owner()  # Only the bot owner can use this
+async def restart(interaction: discord.Interaction):
+    await interaction.response.send_message("Restarting bot... 🔄", ephemeral=True)
+    subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
+@bot.tree.command(name="update", description="Updates the ot to the  most recent version.")
+@app_commands.checks.is_owner()  # Only the bot owner can use this
+async def update(interaction: discord.Interaction):
+    await interaction.response.send_message("Updating bot... 🔄", ephemeral=True)
+
+    # Set Git remote URL (with authentication)
+    subprocess.run(["git", "remote", "set-url", "origin", GIT_AUTH])
+
+    # Pull the latest code
+    pull_result = subprocess.run(["git", "pull"], capture_output=True, text=True)
+
+    if "Already up to date." in pull_result.stdout:
+        await interaction.followup.send("✅ Bot is already up to date!", ephemeral=True)
+    else:
+        await interaction.followup.send("✅ Update pulled! Restarting bot... 🔄", ephemeral=True)
+        subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
 
 bot.run(TOKEN)
