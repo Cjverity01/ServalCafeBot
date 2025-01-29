@@ -885,7 +885,7 @@ async def update(interaction: discord.Interaction):
     await interaction.response.send_message("Updating bot... 🔄", ephemeral=True)
 
     # Set Git remote to ensure it's correct
-    subprocess.run(["git", "remote", "set-url", "origin", "https://github.com/Cjverity01/ServalCafeBot")
+    subprocess.run(["git", "remote", "set-url", "origin", "https://github.com/Cjverity01/ServalCafeBot"])
 
     # Pull the latest code
     pull_result = subprocess.run(["git", "pull"], capture_output=True, text=True)
