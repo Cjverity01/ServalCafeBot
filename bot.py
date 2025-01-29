@@ -16,6 +16,9 @@ from pymongo import MongoClient
 import requests
 import time
 from datetime import datetime
+from discord import app_commands
+import subprocess
+import os
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
