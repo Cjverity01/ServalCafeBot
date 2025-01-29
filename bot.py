@@ -43,8 +43,6 @@ client = MongoClient(mongo_uri)
 db = client["ServalCafe"]
 collection = db["requests"]
 
-# Load token from environment variable
-TOKEN = os.getenv("TOKEN")
 
 @bot.event
 async def on_ready():
@@ -896,5 +894,4 @@ async def update(interaction: discord.Interaction):
     else:
         await interaction.followup.send("✅ Update pulled! Restarting bot... 🔄", ephemeral=True)
         subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
-
-bot.run(TOKEN)
+bot.run(os.getenv("TOKEN"))
