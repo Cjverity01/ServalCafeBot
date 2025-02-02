@@ -895,7 +895,7 @@ async def update(interaction: discord.Interaction):
         subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
 strikecollection = db["strikes"]
 @bot.tree.command(name="strike", description="Give a user a strike with a reason.")
-async def strike(interaction: discord.Interaction, member: discord.Member, reason: str):
+async def strike(interaction: discord.Interaction, member: discord.User, reason: str):
     try:
         # Fetch the user data from MongoDB (synchronously)
         user_data = strikecollection.find_one({"user_id": member.id})
