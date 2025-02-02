@@ -895,4 +895,48 @@ async def update(interaction: discord.Interaction):
     else:
         await interaction.followup.send("✅ Update pulled! Restarting bot... 🔄", ephemeral=True)
         subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
+class StrikeReasonModal(discord.ui.Modal, title="Strike Reason"):
+    reason = discord.ui.TextInput(label="Reason for Strike", style=discord.TextStyle.paragraph, required=True)
+
+    def __init__(self, bot, user):
+        super().__init__()
+        self.bot = bot
+        self.user = user
+
+    async def on_submit(self, interaction: discord.Interaction):
+        strike_reason = self.reason.value
+
+        # Fetch user's current strike count
+        user_data = await collection.find_one({"user_id": self.user.id})
+
+        # Add new user to DB if not exists, otherwise increment strikes
+        if user_data is None:
+            strike_count = 1
+            await collection.insert_one({"user_id": self.user.id, "strikes": strike_count, "reasons": [strike_reason]})
+        else:
+            strike_count = user_data["strikes"] + 1
+            reasons = user_data.get("reasons", [])
+            reasons.append(strike_reason)
+            await collection.update_one({"user_id": self.user.id}, {"$set": {"strikes": strike_count, "reasons": reasons}})
+
+        await interaction.response.send_message(f"{self.user.mention} has been given a strike. They now have {strike_count} strike(s).")
+
+        # DM the user if they reach 3 strikes
+        if strike_count == 3:
+            try:
+                await self.user.send("Hey, you have been marked for having 3 strikes. You will be suspended shortly.")
+            except discord.Forbidden:
+                await interaction.followup.send(f"Could not DM {self.user.mention}. Their DMs might be closed.", ephemeral=True)
+
+# Slash Command to Issue Strike
+@bot.tree.command(name="strike", description="Give a user a strike.")
+@app_commands.describe(user="User to strike.")
+async def strike(interaction: discord.Interaction, user: discord.User):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message("You don't have permission to use this command.", ephemeral=True)
+        return
+
+    modal = StrikeReasonModal(bot, user)
+    await interaction.response.send_modal(modal)
+
 bot.run(os.getenv("TOKEN"))
