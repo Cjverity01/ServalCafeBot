@@ -20,7 +20,6 @@ from discord import app_commands
 import subprocess
 import os
 from discord.ext import commands
-strikecollection = db["strikes"]
 GIT_AUTH = os.getenv("GIT_AUTH")
 load_dotenv()
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
@@ -894,6 +893,7 @@ async def update(interaction: discord.Interaction):
     else:
         await interaction.followup.send("✅ Update pulled! Restarting bot... 🔄", ephemeral=True)
         subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
+strikecollection = db["strikes"]
 @bot.tree.command(name="strike", description="Give a user a strike with a reason.")
 async def strike(interaction: discord.Interaction, member: discord.Member, reason: str):
     try:
