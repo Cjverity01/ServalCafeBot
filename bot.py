@@ -907,11 +907,6 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
         if not user_data:
             user_data = {"user_id": member.id, "strikes": 0, "reasons": []}
 
-        # If the user already has 3 strikes, don't allow more strikes
-        if user_data["strikes"] >= 3:
-            await interaction.response.send_message(f"{member.mention} already has 3 strikes, no more can be given.", ephemeral=True)
-            return
-
         # Update the strike count and log the reason
         new_strike_count = user_data["strikes"] + 1  # Increment by 1 for each strike
         user_data["reasons"].append(reason)
@@ -926,7 +921,7 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
         # Notify the admin that the strike has been applied
         await interaction.response.send_message(f"{member.mention} now has {new_strike_count} strike(s). Reason: {reason}", ephemeral=True)
 
-        # If the user reaches 3 strikes, send them a DM
+        # If the user reaches 3 strikes, send them a DM and reset the strike count
         if new_strike_count >= 3:
             embed = discord.Embed(
                 title="You Have Reached 3 Strikes",
@@ -938,10 +933,18 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
                 await member.send(embed=embed)
             except discord.Forbidden:
                 print(f"Could not DM {member.mention}. DMs might be closed.")
+            
+            # After sending the DM, reset the strike count to 0 in the database
+            strikecollection.update_one(
+                {"user_id": member.id},
+                {"$set": {"strikes": 0}},  # Reset the strikes to 0
+                upsert=True
+            )
     
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
+
 
 
 bot.run(os.getenv("TOKEN"))
