@@ -902,6 +902,8 @@ class StrikeReasonModal(discord.ui.Modal, title="Strike Reason"):
         self.user = user
 
 async def on_submit(self, interaction: discord.Interaction):
+    print("on_submit was called!")  # Debugging: Check if function runs at all
+
     strike_reason = self.reason.value
 
     # Fetch user's current strike count
