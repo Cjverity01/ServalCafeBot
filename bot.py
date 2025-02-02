@@ -20,6 +20,7 @@ from discord import app_commands
 import subprocess
 import os
 from discord.ext import commands
+strikecollection = db["strikes"]
 GIT_AUTH = os.getenv("GIT_AUTH")
 load_dotenv()
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
