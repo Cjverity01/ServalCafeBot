@@ -933,6 +933,7 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
                 await member.send(embed=embed)
             except discord.Forbidden:
                 print(f"Could not DM {member.mention}. DMs might be closed.")
+                # Continue execution even if DMs are closed
             
             # After sending the DM, reset the strike count to 0 in the database
             strikecollection.update_one(
@@ -969,8 +970,5 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
-
-
-
 
 bot.run(os.getenv("TOKEN"))
