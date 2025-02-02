@@ -21,8 +21,6 @@ import subprocess
 import os
 from discord.ext import commands
 GIT_AUTH = os.getenv("GIT_AUTH")
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 load_dotenv()
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
 GUILD_ID = os.getenv("GUILD_ID")
@@ -47,16 +45,16 @@ collection = db["requests"]
 
 @bot.event
 async def on_ready():
-    logger.info("Loading...")
-    logger.line()
-    logger.info("Authors: cj_daboi36.")
-    logger.line()
+    print("Loading...")
+    print("---------------------")
+    print("Authors: cj_daboi36.")
+    print("---------------------")
     await bot.tree.sync()  # Sync slash commands to Discord
-    logger.info("Slash commands synced")
-    logger.line()
-    logger.info(f'Loaded! Connected To: {bot.user}')
-    logger.line()
-    logger.info("Started Successfully!")
+    print("Slash commands synced")
+    print("---------------------")
+    print(f'Loaded! Connected To: {bot.user}')
+    print("---------------------")
+    print("Started Successfully!")
 
     # Fetch pending requests from MongoDB on restart
     pending_requests = collection.find({"status": "pending"})
