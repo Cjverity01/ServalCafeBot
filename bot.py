@@ -838,7 +838,7 @@ class LoaForm(Modal, title="Request An LOA"):
         view.add_item(deny_button)
 
         # Send the embed to the target channel
-        log_channel = self.bot.get_channel(1333571422970445955)  # Replace with your channel ID
+        log_channel = self.bot.get_channel(1335641734448812255)  # Replace with your channel ID
         if log_channel:
             await log_channel.send(embed=embed, view=view)
         await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
