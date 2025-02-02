@@ -898,7 +898,7 @@ async def update(interaction: discord.Interaction):
 async def strike(interaction: discord.Interaction, member: discord.Member, reason: str):
     try:
         # Fetch the user data from MongoDB (synchronously)
-        user_data = collection.find_one({"user_id": member.id})
+        user_data = strikecollection.find_one({"user_id": member.id})
         
         # Debug: Print the result of the find query to see what it returns
         print(f"User data fetched: {user_data}")
@@ -912,7 +912,7 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
         user_data["reasons"].append(reason)
 
         # Update the MongoDB document
-        collection.update_one(
+        strikecollection.update_one(
             {"user_id": member.id},
             {"$set": {"strikes": new_strike_count, "reasons": user_data["reasons"]}},
             upsert=True
