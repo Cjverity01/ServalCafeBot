@@ -895,7 +895,7 @@ async def update(interaction: discord.Interaction):
         subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
 @bot.tree.command(name="strike", description="Give a user a strike with a reason.")
 async def strike(interaction: discord.Interaction, member: discord.Member, strike_value: int, reason: str):
-    # Fetch the user data from MongoDB
+    # Fetch the user data from MongoDB (asynchronously)
     user_data = await collection.find_one({"user_id": member.id})
 
     # If user doesn't exist, create the record
