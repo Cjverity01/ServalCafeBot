@@ -894,33 +894,42 @@ async def update(interaction: discord.Interaction):
         await interaction.followup.send("✅ Update pulled! Restarting bot... 🔄", ephemeral=True)
         subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
 @bot.tree.command(name="strike", description="Give a user a strike with a reason.")
-async def strike(interaction: discord.Interaction, member: discord.Member, strike_value: int, reason: str):
-    # Fetch the user data from MongoDB (asynchronously)
-    user_data = await collection.find_one({"user_id": member.id})
+async def strike(interaction: discord.Interaction, member: discord.Member, reason: str):
+    try:
+        # Fetch the user data from MongoDB (synchronously)
+        user_data = collection.find_one({"user_id": member.id})
+        
+        # Debug: Print the result of the find query to see what it returns
+        print(f"User data fetched: {user_data}")
+        
+        # If user doesn't exist, create the record
+        if not user_data:
+            user_data = {"user_id": member.id, "strikes": 0, "reasons": []}
 
-    # If user doesn't exist, create the record
-    if not user_data:
-        user_data = {"user_id": member.id, "strikes": 0, "reasons": []}
+        # Update the strike count and log the reason
+        new_strike_count = user_data["strikes"] + 1  # Increment by 1 for each strike
+        user_data["reasons"].append(reason)
 
-    # Update the strike count and log the reason
-    new_strike_count = user_data["strikes"] + strike_value
-    user_data["reasons"].append(reason)
+        # Update the MongoDB document
+        collection.update_one(
+            {"user_id": member.id},
+            {"$set": {"strikes": new_strike_count, "reasons": user_data["reasons"]}},
+            upsert=True
+        )
 
-    # Update the MongoDB document
-    await collection.update_one(
-        {"user_id": member.id},
-        {"$set": {"strikes": new_strike_count, "reasons": user_data["reasons"]}},
-        upsert=True
-    )
+        # Notify the admin that the strike has been applied
+        await interaction.response.send_message(f"{member.mention} now has {new_strike_count} strike(s). Reason: {reason}", ephemeral=True)
 
-    # Notify the admin that the strike has been applied
-    await interaction.response.send_message(f"{member.mention} now has {new_strike_count} strike(s). Reason: {reason}", ephemeral=True)
+        # DM user if they reach 3 strikes
+        if new_strike_count >= 3:
+            try:
+                await member.send(f"Hey, you have been marked for having 3 strikes. You will be suspended shortly. Last reason: {reason}")
+            except discord.Forbidden:
+                print(f"Could not DM {member.mention}. DMs might be closed.")
+    except Exception as e:
+        print(f"Error in strike command: {e}")
+        await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
 
-    # DM user if they reach 3 strikes
-    if new_strike_count >= 3:
-        try:
-            await member.send(f"Hey, you have been marked for having 3 strikes. You will be suspended shortly. Last reason: {reason}")
-        except discord.Forbidden:
-            print(f"Could not DM {member.mention}. DMs might be closed.")
+# Run the bot
 
 bot.run(os.getenv("TOKEN"))
