@@ -923,24 +923,21 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
     try:
         # Assuming user_data and new_strike_count logic is above this part
         # Creating the embed message for when the user reaches 3 strikes
-        max_strike = Embed(
-            title="You have reached 3 strikes.",
-            description=(
-                f"You have reached ``3`` strikes so you will be suspended for 5 days shortly. The most recent strike is for ``Last reason: {reason}``."
-            ),
-            color=hex_color
-        )
-
+    embed = discord.Embed(
+        title="You Have Reached 3 Strikes",
+        description=f"You have reached ``3`` strikes so you will be  suspended for 5 days shortly. The most recent strike is for Last reason: {reason}.",
+        color=hex_color
+    )
+    embed.set_footer(text="Bot Powered by Cj's Commissions")
         # DM user if they reach 3 strikes
         if new_strike_count >= 3:
             try:
-                await member.send(embed=max_strike)
+                await member.send(embed=embed)
             except discord.Forbidden:
                 print(f"Could not DM {member.mention}. DMs might be closed.")
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
 
-# Run the bot
 
 bot.run(os.getenv("TOKEN"))
