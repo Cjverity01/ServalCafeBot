@@ -920,21 +920,22 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
 
         # Notify the admin that the strike has been applied
         await interaction.response.send_message(f"{member.mention} now has {new_strike_count} strike(s). Reason: {reason}", ephemeral=True)
-    embed = discord.Embed(
-        title="You Have Reached 3 Strikes",
-        description=f"You have reached ``3`` strikes so you will be  suspended for 5 days shortly. The most recent strike is for Last reason: {reason}.",
-        color=hex_color
-    )
-    embed.set_footer(text="Bot Powered by Cj's Commissions")
-        # DM user if they reach 3 strikes
+
+        # If the user reaches 3 strikes, send them a DM
         if new_strike_count >= 3:
+            embed = discord.Embed(
+                title="You Have Reached 3 Strikes",
+                description=f"You have reached ``3`` strikes so you will be suspended for 5 days shortly. The most recent strike is for the reason: {reason}.",
+                color=hex_color
+            )
+            embed.set_footer(text="Bot Powered by Cj's Commissions")
             try:
                 await member.send(embed=embed)
             except discord.Forbidden:
                 print(f"Could not DM {member.mention}. DMs might be closed.")
+    
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
-
 
 bot.run(os.getenv("TOKEN"))
