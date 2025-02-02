@@ -901,30 +901,31 @@ class StrikeReasonModal(discord.ui.Modal, title="Strike Reason"):
         self.bot = bot
         self.user = user
 
-    async def on_submit(self, interaction: discord.Interaction):
-        strike_reason = self.reason.value
+async def on_submit(self, interaction: discord.Interaction):
+    strike_reason = self.reason.value
 
-        # Fetch user's current strike count
-        user_data = await collection.find_one({"user_id": self.user.id})
+    # Fetch user's current strike count
+    user_data = await collection.find_one({"user_id": self.user.id}) or {}
 
-        # Add new user to DB if not exists, otherwise increment strikes
-        if user_data is None:
-            strike_count = 1
-            await collection.insert_one({"user_id": self.user.id, "strikes": strike_count, "reasons": [strike_reason]})
-        else:
-            strike_count = user_data["strikes"] + 1
-            reasons = user_data.get("reasons", [])
-            reasons.append(strike_reason)
-            await collection.update_one({"user_id": self.user.id}, {"$set": {"strikes": strike_count, "reasons": reasons}})
+    # Add new user to DB if not exists, otherwise increment strikes
+    strike_count = user_data.get("strikes", 0) + 1
+    reasons = user_data.get("reasons", [])
+    reasons.append(strike_reason)
 
-        await interaction.response.send_message(f"{self.user.mention} has been given a strike. They now have {strike_count} strike(s).")
+    await collection.update_one(
+        {"user_id": self.user.id}, 
+        {"$set": {"strikes": strike_count, "reasons": reasons}}, 
+        upsert=True
+    )
 
-        # DM the user if they reach 3 strikes
-        if strike_count == 3:
-            try:
-                await self.user.send("Hey, you have been marked for having 3 strikes. You will be suspended shortly.")
-            except discord.Forbidden:
-                await interaction.followup.send(f"Could not DM {self.user.mention}. Their DMs might be closed.", ephemeral=True)
+    await interaction.response.send_message(f"{self.user.mention} has been given a strike. They now have {strike_count} strike(s).")
+
+    # DM the user if they reach 3 strikes
+    if strike_count == 3:
+        try:
+            await self.user.send("Hey, you have been marked for having 3 strikes. You will be suspended shortly.")
+        except discord.Forbidden:
+            await interaction.followup.send(f"Could not DM {self.user.mention}. Their DMs might be closed.", ephemeral=True)
 
 # Slash Command to Issue Strike
 @bot.tree.command(name="strike", description="Give a user a strike.")
