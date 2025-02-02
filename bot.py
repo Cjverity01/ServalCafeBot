@@ -923,13 +923,13 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
 
         # If the user reaches 3 strikes, send them a DM
         if new_strike_count >= 3:
-            new_strike_count = 0
             embed = discord.Embed(
                 title="You Have Reached 3 Strikes",
                 description=f"You have reached ``3`` strikes so you will be suspended for 5 days shortly. The most recent strike is for the reason: {reason}.",
                 color=hex_color
             )
             embed.set_footer(text="Bot Powered by Cj's Commissions")
+            new_strike_count = 0
             try:
                 await member.send(embed=embed)
             except discord.Forbidden:
