@@ -920,7 +920,10 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
 
         # Notify the admin that the strike has been applied
         await interaction.response.send_message(f"{member.mention} now has {new_strike_count} strike(s). Reason: {reason}", ephemeral=True)
-     max_strike = Embed(
+    try:
+        # Assuming user_data and new_strike_count logic is above this part
+        # Creating the embed message for when the user reaches 3 strikes
+        max_strike = Embed(
             title="You have reached 3 strikes.",
             description=(
                 f"You have reached ``3`` strikes so you will be suspended for 5 days shortly. The most recent strike is for ``Last reason: {reason}``."
