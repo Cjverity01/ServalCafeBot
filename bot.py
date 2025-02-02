@@ -940,7 +940,28 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
                 {"$set": {"strikes": 0}},  # Reset the strikes to 0
                 upsert=True
             )
-    
+                    roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
+
+                # First API call to fetch Roblox ID
+                response_roblox = requests.get(
+                    f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",
+                    headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
+                )
+                if response_roblox.status_code == 200:
+                    data = response_roblox.json()
+                    roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
+                    if not roblox_id:
+                        await interaction.followup.send("Could not find a Roblox ID for this user.")
+                        return
+                else:
+                    await interaction.followup.send(f"Failed to fetch Roblox ID. Status Code: {response_roblox.status_code}")
+                    return
+            except Exception as e:
+                await interaction.followup.send(f"An error occurred while fetching Roblox ID: {e}")
+                return
+
+            # Second API call to rank the user
+            full_url = f"https://ranking.cjscommissions.xyz/group/rank/?groupid=16461735&user_id={roblox_id}&role_number=4&key=CJSCOMMSRANK"
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
