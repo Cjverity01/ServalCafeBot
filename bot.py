@@ -148,7 +148,7 @@ async def on_ready():
 
         view.add_item(accept_button)
         view.add_item(deny_button)
-# 1333571422970445955
+        
         # Log channel to send the LOA requests
         log_channel = bot.get_channel(1335641734448812255)  # Replace with your channel ID
         if log_channel:
