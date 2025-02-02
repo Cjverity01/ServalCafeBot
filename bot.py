@@ -937,10 +937,6 @@ async def strike(interaction: discord.Interaction, member: discord.Member, reaso
                 await member.send(embed=max_strike)
             except discord.Forbidden:
                 print(f"Could not DM {member.mention}. DMs might be closed.")
-        else:
-            # Any code that should run if the strike count is less than 3
-            pass
-
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
