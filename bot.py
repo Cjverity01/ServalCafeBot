@@ -23,7 +23,7 @@ from discord.ext import commands
 GIT_AUTH = os.getenv("GIT_AUTH")
 load_dotenv()
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
-GUILD_ID = os.getenv("GUILD_ID")
+GUILD_ID = "1272622697079377920"
 RANKING_ROLE_ID = int(os.getenv("RANKING_ROLE_ID"))
 hex_color = int("86A269", 16)
 intents = discord.Intents.default()
