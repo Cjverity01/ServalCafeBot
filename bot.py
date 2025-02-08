@@ -840,33 +840,33 @@ class LoaForm(Modal, title="Request An LOA"):
             await log_channel.send(embed=embed, view=view)
         await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 
+import discord
+from discord import app_commands
+
+class LoaForm(discord.ui.Modal):
+    # Define the modal here (add form fields, etc.)
+    pass
+
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def requestloa(interaction: discord.Interaction):
-    #  await interaction.response.send_message(
-      #  "Due to the recent announcement, you cannot request a LOA. Refer to https://discord.com/channels/1256658894508265494/1257793121048203395/1333761520651337789 for more info.", 
-       # ephemeral=True
-  #  )
     try:
-         Instantiate the modal form
+        # Instantiate the modal form
         modal = LoaForm(bot)
         
         # Send the modal to the user
         await interaction.response.send_modal(modal)
     except Exception as e:
-         Catch and log any errors
+        # Catch and log any errors
         print(f"Error showing modal: {e}")
         await interaction.response.send_message(
-            "An error occurred while processing your request. Please try again later.", 
+            "An error occurred while processing your request. Please try again later.",
             ephemeral=True
         )
+
 class MyBot(discord.Client):
     def __init__(self):
         super().__init__(intents=discord.Intents.default())
         self.tree = app_commands.CommandTree(self)
-
-    async def on_ready(self):
-        print(f"Logged in as {self.user}")
-        await self.tree.sync()  # Sync commands globally (may take some time)
 
 
 @bot.tree.command(name="restart", description="Restarts the bot.")
