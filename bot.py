@@ -375,7 +375,7 @@ async def shift(interaction: discord.Interaction):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
 
-    if member and any(role.id == "1325941896438223001" for role in member.roles):
+    if member and any(role.id == 1325941896438223001 for role in member.roles):
         # Get the channel to send the message to
         channel = bot.get_channel(response_channel_id)
 
@@ -415,7 +415,7 @@ async def shift(interaction: discord.Interaction):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
 
-    if member and any(role.id == "1325941896438223001" for role in member.roles):
+    if member and any(role.id == 1325941896438223001 for role in member.roles):
         # Get the channel to send the message to
         channel = bot.get_channel(response_channel_id)
 
@@ -451,7 +451,7 @@ async def shift(interaction: discord.Interaction):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
 
-    if member and any(role.id == "1333537526232645685" for role in member.roles):
+    if member and any(role.id == 1333537526232645685 for role in member.roles):
         # Get the channel to send the message to
         channel = bot.get_channel(response_channel_id)
 
@@ -487,7 +487,7 @@ async def shift(interaction: discord.Interaction):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
 
-    if member and any(role.id == "1333537526232645685" for role in member.roles):
+    if member and any(role.id == 1333537526232645685 for role in member.roles):
         # Get the channel to send the message to
         channel = bot.get_channel(response_channel_id)
 
@@ -521,7 +521,7 @@ async def shift(interaction: discord.Interaction):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
 
-    if member and any(role.id == "1333537526232645685" for role in member.roles):
+    if member and any(role.id == 1333537526232645685 for role in member.roles):
         # Get the channel to send the message to
         channel = bot.get_channel(response_channel_id)
 
@@ -555,7 +555,7 @@ async def shift(interaction: discord.Interaction):
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
 
-    if member and any(role.id == "1333537526232645685" for role in member.roles):
+    if member and any(role.id == 1333537526232645685 for role in member.roles):
         # Get the channel to send the message to
         channel = bot.get_channel(response_channel_id)
 
