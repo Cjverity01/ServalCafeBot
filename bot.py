@@ -365,7 +365,6 @@ async def shift(interaction: discord.Interaction):
     # Settings for this command
     required_role_id = 1317560300060541112  # The required role ID for this command
     role_to_ping = 1308833378153267210  # The role to ping
-    response_channel_id = 1308833433379934218  # Channel to send the message to
 
     # Check if the interaction is in a guild
     if interaction.guild is None:
@@ -405,7 +404,6 @@ async def shift(interaction: discord.Interaction):
 @bot.tree.command(name="shiftend", description="Start a shift")
 async def shift(interaction: discord.Interaction):
     # Settings for this command
-    response_channel_id = 1308833433379934218  # Channel to send the message to
 
     # Check if the interaction is in a guild
     if interaction.guild is None:
@@ -441,7 +439,7 @@ async def shift(interaction: discord.Interaction):
     # Settings for this command
     required_role_id = 1317560300060541112  # The required role ID for this command
     role_to_ping = 1308833378153267210  # The role to ping
-    response_channel_id = 1308833433379934218  # Channel to send the message to
+
 
     # Check if the interaction is in a guild
     if interaction.guild is None:
@@ -477,7 +475,6 @@ async def shift(interaction: discord.Interaction):
     # Settings for this command
     required_role_id = 1317560300060541112  # The required role ID for this command
     role_to_ping = 1308833378153267210  # The role to ping
-    response_channel_id = 1308833433379934218  # Channel to send the message to
 
     # Check if the interaction is in a guild
     if interaction.guild is None:
@@ -511,7 +508,6 @@ async def shift(interaction: discord.Interaction):
     # Settings for this command
     required_role_id = 1317560300060541112  # The required role ID for this command
     role_to_ping = 1308833378153267210  # The role to ping
-    response_channel_id = 1308833433379934218  # Channel to send the message to
 
     # Check if the interaction is in a guild
     if interaction.guild is None:
@@ -545,7 +541,7 @@ async def shift(interaction: discord.Interaction):
     # Settings for this command
     required_role_id = 1317560300060541112  # The required role ID for this command
     role_to_ping = 1308833378153267210  # The role to ping
-    response_channel_id = 1308833433379934218  # Channel to send the message to
+
 
     # Check if the interaction is in a guild
     if interaction.guild is None:
