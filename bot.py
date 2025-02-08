@@ -840,13 +840,6 @@ class LoaForm(Modal, title="Request An LOA"):
             await log_channel.send(embed=embed, view=view)
         await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 
-import discord
-from discord import app_commands
-
-class LoaForm(discord.ui.Modal):
-    # Define the modal here (add form fields, etc.)
-    pass
-
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def requestloa(interaction: discord.Interaction):
     try:
@@ -862,13 +855,6 @@ async def requestloa(interaction: discord.Interaction):
             "An error occurred while processing your request. Please try again later.",
             ephemeral=True
         )
-
-class MyBot(discord.Client):
-    def __init__(self):
-        super().__init__(intents=discord.Intents.default())
-        self.tree = app_commands.CommandTree(self)
-
-
 @bot.tree.command(name="restart", description="Restarts the bot.")
 @commands.is_owner()
 async def restart(interaction: discord.Interaction):
