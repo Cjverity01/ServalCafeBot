@@ -21,6 +21,7 @@ import subprocess
 import os
 from discord.ext import commands
 GIT_AUTH = os.getenv("GIT_AUTH")
+response_channel_id = 1308833433379934218  # Channel to send the message to
 load_dotenv()
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
 GUILD_ID = "1272622697079377920"
