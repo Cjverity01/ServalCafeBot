@@ -422,14 +422,14 @@ async def shift(interaction: discord.Interaction):
             # Create the embed
             embed = discord.Embed(
                 title="The Recent Shift Has Ended",
-                description="The recent shift has now ended! Thank you to all the attendees. Dont forget to checkout the shift picture in <#1305300770354368532>!",
+                description="The recent shift has now ended! Thank you to all the attendees. Dont forget to checkout the shift picture in <#1325942156954960008>!",
                 color=hex_color
             )
 
             embed.set_footer(text="Bot Powered by Cj's Commissions")
             await channel.send(embed=embed)
 
-            await interaction.response.send_message("Shift started successfully. Please stay in the shift for at least 15 minutes or you will be striked!", ephemeral=True)
+            await interaction.response.send_message("Shift ended successfully.", ephemeral=True)
         else:
             await interaction.response.send_message("An error occured while sending.", ephemeral=True)
     else:
