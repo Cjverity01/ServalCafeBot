@@ -961,57 +961,59 @@ async def strike(interaction: discord.Interaction, member: discord.User, reason:
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
-  logger = logging.getLogger("bot")
+logger = logging.getLogger("bot")
+logger.setLevel(logging.INFO)
+handler = logging.FileHandler("bot_console.log", encoding="utf-8")
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
-class DebugCommands(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.log_file_path = "bot_console.log"  # File where console logs will be saved
+# Redirect stdout and stderr to log file
+class ConsoleLogger:
+    def __init__(self, log_file_path="bot_console.log"):
+        self.log_file_path = log_file_path
+        sys.stdout = open(self.log_file_path, "a", encoding="utf-8")
+        sys.stderr = sys.stdout  # Redirect errors too
 
-    @bot.tree.command(name="hastebin")
-    @commands.is_owner()
-    async def debug_hastebin(self, ctx):
-        """Posts bot's console logs to Hastebin."""
-        haste_url = os.environ.get("HASTE_URL", "https://hastebin.cc")
+# Initialize logging redirection
+console_logger = ConsoleLogger()
 
-        # Ensure console output is logged to a file
-        sys.stdout.flush()  # Flush the current output buffer
-        with open(self.log_file_path, "rb") as f:
+@bot.tree.command(name="hastebin")
+@commands.is_owner()
+async def debug_hastebin(ctx):
+    """Posts bot's console logs to Hastebin."""
+    haste_url = os.environ.get("HASTE_URL", "https://hastebin.cc")
+
+    # Ensure logs are flushed before reading
+    sys.stdout.flush()
+    sys.stderr.flush()
+
+    try:
+        with open("bot_console.log", "rb") as f:
             logs = BytesIO(f.read().strip())
 
-        try:
-            async with self.bot.session.post(f"{haste_url}/documents", data=logs) as resp:
-                data = await resp.json()
-                key = data.get("key")
+        async with bot.session.post(f"{haste_url}/documents", data=logs) as resp:
+            data = await resp.json()
+            key = data.get("key")
 
-                if not key:
-                    logger.error(f"Failed to upload logs: {data}")
-                    raise KeyError("No key returned from Hastebin")
+            if not key:
+                logger.error(f"Failed to upload logs: {data}")
+                raise KeyError("No key returned from Hastebin")
 
-                embed = discord.Embed(
-                    title="Debug Logs",
-                    color=self.bot.main_color,
-                    description=f"[View Logs]({haste_url}/{key})",
-                )
-        except (JSONDecodeError, ClientResponseError, KeyError) as e:
-            logger.error(f"Error uploading logs: {e}")
             embed = discord.Embed(
                 title="Debug Logs",
-                color=self.bot.main_color,
-                description="Something went wrong. Unable to upload logs to Hastebin.",
+                color=discord.Color.blue(),
+                description=f"[View Logs]({haste_url}/{key})",
             )
-            embed.set_footer(text="Check your bot's console manually.")
+    except (JSONDecodeError, ClientResponseError, KeyError) as e:
+        logger.error(f"Error uploading logs: {e}")
+        embed = discord.Embed(
+            title="Debug Logs",
+            color=discord.Color.red(),
+            description="Something went wrong. Unable to upload logs to Hastebin.",
+        )
+        embed.set_footer(text="Check your bot's console manually.")
 
-        await ctx.send(embed=embed)
-    
-    def capture_console_logs(self):
-        """Redirects console output to a log file."""
-        log_file = open(self.log_file_path, "a", encoding="utf-8")
-        sys.stdout = log_file
-        sys.stderr = log_file
-
-def setup(bot):
-    cog = DebugCommands(bot)
-    cog.capture_console_logs()
-    bot.add_cog(cog)
+    await ctx.send(embed=embed)
 bot.run(os.getenv("TOKEN"))
+
