@@ -3,9 +3,7 @@ from discord import Interaction, Embed, ButtonStyle
 from discord import ui
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-import os
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 from discord.ui import Modal, TextInput, Button, View
 import logging
@@ -13,17 +11,12 @@ from discord.ext.commands import Bot
 import traceback
 import aiohttp
 from pymongo import MongoClient
-import requests
-import time
-from datetime import datetime
-from discord import app_commands
 from aiohttp import ClientResponseError
 from json import JSONDecodeError
 from io import BytesIO
 import sys
-import subprocess
 import os
-from discord.ext import commands
+
 # Redirect stdout and stderr to capture all console output
 class ConsoleToFile:
     def __init__(self, file_path):
