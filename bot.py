@@ -993,13 +993,13 @@ async def debug_hastebin(interaction: discord.Interaction):
 
             embed = discord.Embed(
                 title="Debug Logs",
-                color=discord.Color.blue(),
-                description=f"[View Logs]({haste_url}/{key})",
+                color=hex_color,
+                description=f"{haste_url}/{key})",
             )
     except Exception as e:
         embed = discord.Embed(
             title="Debug Logs",
-            color=discord.Color.red(),
+            color=hex_color,
             description="Something went wrong. Unable to upload logs to Hastebin.",
         )
         embed.set_footer(text=f"Error: {e}")
