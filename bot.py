@@ -24,6 +24,17 @@ import sys
 import subprocess
 import os
 from discord.ext import commands
+# Setup logger
+logger = logging.getLogger("bot")
+logger.setLevel(logging.INFO)
+handler = logging.FileHandler("bot_console.log", encoding="utf-8")
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# Redirect stdout and stderr to log file
+sys.stdout = open("bot_console.log", "a", encoding="utf-8")
+sys.stderr = sys.stdout  # Redirect errors too
 GIT_AUTH = os.getenv("GIT_AUTH")
 response_channel_id = 1325942156954960008  # Channel to send the message to
 load_dotenv()
@@ -961,22 +972,6 @@ async def strike(interaction: discord.Interaction, member: discord.User, reason:
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
-logger = logging.getLogger("bot")
-logger.setLevel(logging.INFO)
-handler = logging.FileHandler("bot_console.log", encoding="utf-8")
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# Redirect stdout and stderr to log file
-class ConsoleLogger:
-    def __init__(self, log_file_path="bot_console.log"):
-        self.log_file_path = log_file_path
-        sys.stdout = open(self.log_file_path, "a", encoding="utf-8")
-        sys.stderr = sys.stdout  # Redirect errors too
-
-# Initialize logging redirection
-console_logger = ConsoleLogger()
 
 @bot.tree.command(name="hastebin")
 @commands.is_owner()
