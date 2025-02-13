@@ -1015,3 +1015,4 @@ def setup(bot):
     cog.capture_console_logs()
     bot.add_cog(cog)
 bot.run(os.getenv("TOKEN"))
+
