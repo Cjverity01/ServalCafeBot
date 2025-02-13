@@ -24,17 +24,23 @@ import sys
 import subprocess
 import os
 from discord.ext import commands
-# Setup logger
-logger = logging.getLogger("bot")
-logger.setLevel(logging.INFO)
-handler = logging.FileHandler("bot_console.log", encoding="utf-8")
-formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+# Redirect stdout and stderr to capture all console output
+class ConsoleToFile:
+    def __init__(self, file_path):
+        self.file = open(file_path, "a", encoding="utf-8")
+        sys.stdout = self
+        sys.stderr = self  # Redirect errors too
 
-# Redirect stdout and stderr to log file
-sys.stdout = open("bot_console.log", "a", encoding="utf-8")
-sys.stderr = sys.stdout  # Redirect errors too
+    def write(self, message):
+        self.file.write(message)
+        self.file.flush()  # Ensure log updates instantly
+        sys.__stdout__.write(message)  # Print to console as well
+
+    def flush(self):
+        self.file.flush()
+
+# Setup file capture
+console_logger = ConsoleToFile("bot_console.log")
 GIT_AUTH = os.getenv("GIT_AUTH")
 response_channel_id = 1325942156954960008  # Channel to send the message to
 load_dotenv()
