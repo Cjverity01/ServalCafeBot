@@ -972,27 +972,23 @@ async def strike(interaction: discord.Interaction, member: discord.User, reason:
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
-
 @bot.tree.command(name="hastebin")
 @commands.is_owner()
-async def debug_hastebin(ctx):
+async def debug_hastebin(interaction: discord.Interaction):
     """Posts bot's console logs to Hastebin."""
     haste_url = os.environ.get("HASTE_URL", "https://hastebin.cc")
 
-    # Ensure logs are flushed before reading
-    sys.stdout.flush()
-    sys.stderr.flush()
+    # Ensure console output is logged to a file
+    sys.stdout.flush()  # Flush the current output buffer
+    with open("bot_console.log", "rb") as f:
+        logs = BytesIO(f.read().strip())
 
     try:
-        with open("bot_console.log", "rb") as f:
-            logs = BytesIO(f.read().strip())
-
         async with bot.session.post(f"{haste_url}/documents", data=logs) as resp:
             data = await resp.json()
             key = data.get("key")
 
             if not key:
-                logger.error(f"Failed to upload logs: {data}")
                 raise KeyError("No key returned from Hastebin")
 
             embed = discord.Embed(
@@ -1000,15 +996,16 @@ async def debug_hastebin(ctx):
                 color=discord.Color.blue(),
                 description=f"[View Logs]({haste_url}/{key})",
             )
-    except (JSONDecodeError, ClientResponseError, KeyError) as e:
-        logger.error(f"Error uploading logs: {e}")
+    except Exception as e:
         embed = discord.Embed(
             title="Debug Logs",
             color=discord.Color.red(),
             description="Something went wrong. Unable to upload logs to Hastebin.",
         )
-        embed.set_footer(text="Check your bot's console manually.")
+        embed.set_footer(text=f"Error: {e}")
 
-    await ctx.send(embed=embed)
+    # Use interaction.response.send_message() instead of ctx.send()
+    await interaction.response.send_message(embed=embed)
+
 bot.run(os.getenv("TOKEN"))
 
