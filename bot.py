@@ -60,6 +60,7 @@ collection = db["requests"]
 
 @bot.event
 async def on_ready():
+    bot.session = aiohttp.ClientSession()
     print("Loading...")
     print("---------------------")
     print("Authors: cj_daboi36.")
