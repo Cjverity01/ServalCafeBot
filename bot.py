@@ -858,23 +858,23 @@ class LoaForm(Modal, title="Request An LOA"):
 
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def requestloa(interaction: discord.Interaction):
-    await interaction.response.send_message(
-            "LOA Request's are currently disabled.",
-            ephemeral=False
-        )
-    #try:
-        # Instantiate the modal form
-        #modal = LoaForm(bot)
+  #  await interaction.response.send_message(
+         #   "LOA Request's are currently disabled.",
+         #   ephemeral=False
+     #   )
+    try:
+       #  Instantiate the modal form
+        modal = LoaForm(bot)
         
         # Send the modal to the user
-        #await interaction.response.send_modal(modal)
-    #except Exception as e:
+        await interaction.response.send_modal(modal)
+    except Exception as e:
         # Catch and log any errors
-        #print(f"Error showing modal: {e}")
-        #await interaction.response.send_message(
-            #"An error occurred while processing your request. Please try again later.",
-            #ephemeral=True
-        #)
+        print(f"Error showing modal: {e}")
+        await interaction.response.send_message(
+            "An error occurred while processing your request. Please try again later.",
+            ephemeral=True
+        )
 @bot.tree.command(name="restart", description="Restarts the bot.")
 @commands.is_owner()
 async def restart(interaction: discord.Interaction):
