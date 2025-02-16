@@ -16,7 +16,7 @@ from json import JSONDecodeError
 from io import BytesIO
 import sys
 import os
-
+import requests
 # Redirect stdout and stderr to capture all console output
 class ConsoleToFile:
     def __init__(self, file_path):
