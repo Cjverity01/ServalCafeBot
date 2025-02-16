@@ -858,18 +858,10 @@ class LoaForm(Modal, title="Request An LOA"):
 
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def requestloa(interaction: discord.Interaction):
-  #  await interaction.response.send_message(
-         #   "LOA Request's are currently disabled.",
-         #   ephemeral=False
-     #   )
     try:
-       #  Instantiate the modal form
-        modal = LoaForm(bot)
-        
-        # Send the modal to the user
-        await interaction.response.send_modal(modal)
+        # Instantiate and send the modal form
+        await interaction.response.send_modal(LoaForm())
     except Exception as e:
-        # Catch and log any errors
         print(f"Error showing modal: {e}")
         await interaction.response.send_message(
             "An error occurred while processing your request. Please try again later.",
