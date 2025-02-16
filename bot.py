@@ -36,6 +36,7 @@ class ConsoleToFile:
 # Setup file capture
 console_logger = ConsoleToFile("bot_console.log")
 GIT_AUTH = os.getenv("GIT_AUTH")
+LOA_OPEN= True
 response_channel_id = 1325942156954960008  # Channel to send the message to
 load_dotenv()
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
@@ -856,17 +857,36 @@ class LoaForm(Modal, title="Request An LOA"):
             await log_channel.send(embed=embed, view=view)
         await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 
+
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def requestloa(interaction: discord.Interaction):
-    try:
-        # Instantiate and send the modal form with bot reference
-        await interaction.response.send_modal(LoaForm(bot))
-    except Exception as e:
-        print(f"Error showing modal: {e}")
+    if LOA_OPEN:  # No need for == True, since it's already a boolean
+        try:
+            # Send the LOA modal form
+            await interaction.response.send_modal(LoaForm(bot))
+        except Exception as e:
+            print(f"Error showing modal: {e}")
+            await interaction.response.send_message(
+                "An error occurred while processing your request. Please try again later.",
+                ephemeral=True
+            )
+    else:
         await interaction.response.send_message(
-            "An error occurred while processing your request. Please try again later.",
+            "LOA Requests are disabled.",
             ephemeral=True
-        )@bot.tree.command(name="restart", description="Restarts the bot.")
+        )
+@bot.tree.command(name="toggle-loa", description="Enable or disable LOA requests (Admin only)")
+@commands.has_permissions(administrator=True)  # Restricts command to server admins
+async def toggle_loa(interaction: discord.Interaction):
+    global LOA_OPEN  # Allows modification of the global variable
+    LOA_OPEN = not LOA_OPEN  # Toggle the value (True -> False, False -> True)
+
+    status = "enabled" if LOA_OPEN else "disabled"
+    await interaction.response.send_message(
+        f"LOA requests have been **{status}**.",
+        ephemeral=True  # Message is only visible to the admin
+    )
+@bot.tree.command(name="restart", description="Restarts the bot.")
 @commands.is_owner()
 async def restart(interaction: discord.Interaction):
     await interaction.response.send_message("Restarting bot... 🔄", ephemeral=True)
