@@ -861,12 +861,6 @@ async def requestloa(interaction: discord.Interaction):
     try:
         # Instantiate and send the modal form
         await interaction.response.send_modal(LoaForm())
-    except Exception as e:
-        print(f"Error showing modal: {e}")
-        await interaction.response.send_message(
-            "An error occurred while processing your request. Please try again later.",
-            ephemeral=True
-        )
 @bot.tree.command(name="restart", description="Restarts the bot.")
 @commands.is_owner()
 async def restart(interaction: discord.Interaction):
