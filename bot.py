@@ -409,7 +409,7 @@ async def shift(interaction: discord.Interaction):
 
             # Send the message with or without the role ping (conditionally)
             if role_to_ping:
-                await channel.send(content=f"<@&1325941898212540426> <@1077996121122689024>", embed=embed)
+                await channel.send(content=f"<@&1325941898212540426>", embed=embed)
             else:
                 await channel.send(embed=embed)
 
