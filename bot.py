@@ -174,7 +174,7 @@ async def on_ready():
 
 @bot.tree.command(name="terminate", description="Terminate a user.")
 @commands.has_permissions(administrator=True)  # Restricts command to server admins
-async def terminate_user(interaction: discord.Interaction, user: discord.User, rank: str):  # Renamed function to match the command name
+async def terminate_user(interaction: discord.Interaction, user: discord.User):  # Renamed function to match the command name
     await interaction.response.defer()  # Defer the response to avoid the 'already acknowledged' error
     guild = await bot.fetch_guild(GUILD_ID)
     member = await guild.fetch_member(interaction.user.id)
