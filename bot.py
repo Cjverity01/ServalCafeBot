@@ -212,7 +212,7 @@ async def terminate_user(interaction: discord.Interaction, user: discord.User): 
                 if response_rank.status_code == 200:
                     data = response_rank.json()
                     message = data.get("message")
-                    if message == f"The user's rank has been set to {rank}!":
+                    if message == f"The user's rank has been set to 1!":
                         await interaction.followup.send(f"Successfully terminated the user!")
                     else:
                         await interaction.followup.send(f"Error: {message}")
