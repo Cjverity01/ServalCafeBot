@@ -172,6 +172,58 @@ async def on_ready():
         if log_channel:
             await log_channel.send(embed=embed, view=view)
 
+@bot.tree.command(name="terminate", description="Terminate a user.")
+@commands.has_permissions(administrator=True)  # Restricts command to server admins
+async def terminate_user(interaction: discord.Interaction, user: discord.User, rank: str):  # Renamed function to match the command name
+    await interaction.response.defer()  # Defer the response to avoid the 'already acknowledged' error
+    guild = await bot.fetch_guild(GUILD_ID)
+    member = await guild.fetch_member(interaction.user.id)
+
+    if member:
+        # Debugging: print out the user's role IDs
+        print(f"{interaction.user.name} roles: {[role.id for role in member.roles]}")
+
+        if any(role.id == RANKING_ROLE_ID for role in member.roles):  # Check if user has a required role
+            try:
+                roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
+
+                # First API call to fetch Roblox ID
+                response_roblox = requests.get(
+                    f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",
+                    headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
+                )
+                if response_roblox.status_code == 200:
+                    data = response_roblox.json()
+                    roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
+                    if not roblox_id:
+                        await interaction.followup.send("Could not find a Roblox ID for this user.")
+                        return
+                else:
+                    await interaction.followup.send(f"Failed to fetch Roblox ID. Status Code: {response_roblox.status_code}")
+                    return
+            except Exception as e:
+                await interaction.followup.send(f"An error occurred while fetching Roblox ID: {e}")
+                return
+
+            # Second API call to rank the user
+            full_url = f"https://ranking.cjscommissions.xyz/group/rank/?groupid=16461735&user_id={roblox_id}&role_number=1&key=CJSCOMMSRANK"
+            try:
+                response_rank = requests.get(full_url)
+                if response_rank.status_code == 200:
+                    data = response_rank.json()
+                    message = data.get("message")
+                    if message == f"The user's rank has been set to {rank}!":
+                        await interaction.followup.send(f"Successfully terminated the user!")
+                    else:
+                        await interaction.followup.send(f"Error: {message}")
+                else:
+                    await interaction.followup.send(f"Failed to terminate user. Status Code: {response_rank.status_code}")
+            except Exception as e:
+                await interaction.followup.send(f"An error occurred during termination: {e}")
+        else:
+            await interaction.followup.send("You do not have the required role to terminate users.")
+    else:
+        await interaction.followup.send("Could not fetch the member details.")
 @bot.tree.command(name="direct-message", description="Send a DM to a user")
 async def dm(interaction: discord.Interaction, user: discord.User, message: str):
     embed = discord.Embed(
