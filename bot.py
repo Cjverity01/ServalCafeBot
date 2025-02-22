@@ -821,10 +821,15 @@ class LoaApprovalView(View):
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.success, custom_id="accept_loa")
     async def accept_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         loa_request = collection.find_one({"user_id": self.user_id})
-        if not loa_request or loa_request["status"] != "pending":
-            await interaction.response.send_message("This request has already been processed.", ephemeral=True)
+        if not loa_request:
+            await interaction.response.send_message("This LOA request does not exist.", ephemeral=True)
+            return
+        
+        if loa_request["status"] != "pending":
+            await interaction.response.send_message("This request has already been processed or is not pending.", ephemeral=True)
             return
 
+        # Proceed with accepting the request if it's still pending
         embed_accept = discord.Embed(
             title="Your LOA Request Was Accepted",
             description=f"Hey <@{self.user_id}>! Your LOA request was accepted and will start on `{loa_request['start_date']}` and end on `{loa_request['end_date']}`.",
@@ -839,11 +844,16 @@ class LoaApprovalView(View):
     @discord.ui.button(label="Deny", style=discord.ButtonStyle.danger, custom_id="deny_loa")
     async def deny_callback(self, interaction: discord.Interaction, button: discord.ui.Button):
         loa_request = collection.find_one({"user_id": self.user_id})
-        if not loa_request or loa_request["status"] != "pending":
-            await interaction.response.send_message("This request has already been processed.", ephemeral=True)
+        if not loa_request:
+            await interaction.response.send_message("This LOA request does not exist.", ephemeral=True)
+            return
+        
+        if loa_request["status"] != "pending":
+            await interaction.response.send_message("This request has already been processed or is not pending.", ephemeral=True)
             return
 
         await interaction.response.send_modal(DenialReasonModal(self.user_id))
+
 
 class DenialReasonModal(Modal, title="Denial Reason"):
     def __init__(self, user_id: int):
