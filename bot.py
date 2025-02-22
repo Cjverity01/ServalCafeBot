@@ -868,31 +868,6 @@ class DenialReasonModal(Modal, title="Denial Reason"):
         collection.update_one({"user_id": self.user_id}, {"$set": {"status": "denied", "denial_reason": self.reason.value}})
         await interaction.response.send_message("Denial reason submitted and user notified.", ephemeral=True)
 
-@bot.event
-async def on_ready():
-    bot.add_view(LoaApprovalView(0))  # Register persistent buttons globally
-    print(f"Logged in as {bot.user}")
-
-@bot.command()
-async def request_loa(ctx):
-    """Opens the LOA request form."""
-    await ctx.send_modal(LoaForm(bot))
-
-bot.run("YOUR_BOT_TOKEN")
-
-        accept_button.callback = accept_callback
-        deny_button.callback = deny_callback
-
-        view.add_item(accept_button)
-        view.add_item(deny_button)
-
-        # Send the embed to the target channel
-        log_channel = self.bot.get_channel(1335641734448812255)  # Replace with your channel ID
-        if log_channel:
-            await log_channel.send(embed=embed, view=view)
-        await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
-
-
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def requestloa(interaction: discord.Interaction):
     if LOA_OPEN:  # No need for == True, since it's already a boolean
