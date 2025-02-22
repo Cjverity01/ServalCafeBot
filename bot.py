@@ -62,6 +62,7 @@ collection = db["requests"]
 
 @bot.event
 async def on_ready():
+    bot.add_view(LoaApprovalView(0))  # Register persistent buttons globally
     bot.session = aiohttp.ClientSession()
     print("Loading...")
     print("---------------------")
@@ -74,19 +75,17 @@ async def on_ready():
     print("---------------------")
     print("Started Successfully!")
 
-    # Fetch pending requests from MongoDB on restart
     # Check for pending LOA requests after bot restart
     pending_requests = collection.find({"status": "pending"})
     for request in pending_requests:
-        view = LoaApprovalView(request["user_id"])
-        log_channel = bot.get_channel(1335641734448812255)  # Replace with your channel ID
-        embed = discord.Embed(
-            title="Pending LOA Request",
-            description=f"<@{request['user_id']}> has a pending LOA request.",
-            color=0xFF0000
-        )
-        if log_channel:
-            await log_channel.send(embed=embed, view=view)
+        message_id = request.get("message_id")
+        if message_id:
+            log_channel = bot.get_channel(1335641734448812255)  # Replace with your channel ID
+            if log_channel:
+                message = await log_channel.fetch_message(message_id)
+                # Add buttons again if they are still pending
+                view = LoaApprovalView(request["user_id"])
+                await message.edit(view=view)
 
 @bot.tree.command(name="terminate", description="Terminate a user.")
 @commands.has_permissions(administrator=True)  # Restricts command to server admins
@@ -725,7 +724,9 @@ class LoaForm(Modal, title="Request An LOA"):
         view = LoaApprovalView(interaction.user.id)
         log_channel = self.bot.get_channel(1335641734448812255)  # Replace with your channel ID
         if log_channel:
-            await log_channel.send(embed=embed, view=view)
+            message = await log_channel.send(embed=embed, view=view)
+            # Save the message ID so we can edit it later
+            collection.update_one({"user_id": interaction.user.id}, {"$set": {"message_id": message.id}})
 
         await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 
@@ -772,19 +773,19 @@ class LoaApprovalView(View):
 
     async def on_timeout(self):
         """This method is called when the view times out (buttons expire)."""
-        # You can handle the expired buttons here, such as sending a message that the buttons have expired.
-        expired_embed = discord.Embed(
-            title="LOA Request Timeout",
-            description="The LOA request buttons have expired. Please request a new LOA if you still need one.",
-            color=0xFF0000
-        )
-        log_channel = self.bot.get_channel(1335641734448812255)  # Replace with your channel ID
-        if log_channel:
-            await log_channel.send(embed=expired_embed)
-
-        # Optionally, send a new message with a new view (with fresh buttons)
-        new_view = LoaApprovalView(self.user_id)  # New view with fresh buttons
-        await log_channel.send(embed=expired_embed, view=new_view)
+        loa_request = collection.find_one({"user_id": self.user_id})
+        if not loa_request:
+            return
+        
+        # Fetch the original message
+        message_id = loa_request.get("message_id")
+        if message_id:
+            log_channel = self.bot.get_channel(1335641734448812255)  # Replace with your channel ID
+            if log_channel:
+                message = await log_channel.fetch_message(message_id)
+                # Update the message with new buttons (or fresh buttons after timeout)
+                new_view = LoaApprovalView(self.user_id)
+                await message.edit(view=new_view)
 
 class DenialReasonModal(Modal, title="Denial Reason"):
     def __init__(self, user_id: int):
