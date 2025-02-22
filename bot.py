@@ -815,7 +815,7 @@ class LoaForm(Modal, title="Request An LOA"):
 
 class LoaApprovalView(View):
     def __init__(self, user_id: int):
-        super().__init__(timeout=None)  # Persistent view
+        super().__init__(timeout=300)  # Timeout after 5 minutes
         self.user_id = user_id
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.success, custom_id="accept_loa")
@@ -854,6 +854,21 @@ class LoaApprovalView(View):
 
         await interaction.response.send_modal(DenialReasonModal(self.user_id))
 
+    async def on_timeout(self):
+        """This method is called when the view times out (buttons expire)."""
+        # You can handle the expired buttons here, such as sending a message that the buttons have expired.
+        expired_embed = discord.Embed(
+            title="LOA Request Timeout",
+            description="The LOA request buttons have expired. Please request a new LOA if you still need one.",
+            color=0xFF0000
+        )
+        log_channel = self.bot.get_channel(1335641734448812255)  # Replace with your channel ID
+        if log_channel:
+            await log_channel.send(embed=expired_embed)
+
+        # Optionally, send a new message with a new view (with fresh buttons)
+        new_view = LoaApprovalView(self.user_id)  # New view with fresh buttons
+        await log_channel.send(embed=expired_embed, view=new_view)
 
 class DenialReasonModal(Modal, title="Denial Reason"):
     def __init__(self, user_id: int):
