@@ -3,9 +3,7 @@ from discord import Interaction, Embed, ButtonStyle
 from discord import ui
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-import os
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 from discord.ui import Modal, TextInput, Button, View
 import logging
@@ -13,6 +11,11 @@ from discord.ext.commands import Bot
 import traceback
 import aiohttp
 from pymongo import MongoClient
+from aiohttp import ClientResponseError
+from json import JSONDecodeError
+from io import BytesIO
+import sys
+import os
 import requests
 import time
 from datetime import datetime
@@ -22,9 +25,25 @@ from json import JSONDecodeError
 from io import BytesIO
 import sys
 import subprocess
-import os
-from discord.ext import commands
+# Redirect stdout and stderr to capture all console output
+class ConsoleToFile:
+    def __init__(self, file_path):
+        self.file = open(file_path, "a", encoding="utf-8")
+        sys.stdout = self
+        sys.stderr = self  # Redirect errors too
+
+    def write(self, message):
+        self.file.write(message)
+        self.file.flush()  # Ensure log updates instantly
+        sys.__stdout__.write(message)  # Print to console as well
+
+    def flush(self):
+        self.file.flush()
+
+# Setup file capture
+console_logger = ConsoleToFile("bot_console.log")
 GIT_AUTH = os.getenv("GIT_AUTH")
+LOA_OPEN= True
 response_channel_id = 1325942156954960008  # Channel to send the message to
 load_dotenv()
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
@@ -50,6 +69,7 @@ collection = db["requests"]
 
 @bot.event
 async def on_ready():
+    bot.session = aiohttp.ClientSession()
     print("Loading...")
     print("---------------------")
     print("Authors: cj_daboi36.")
@@ -159,6 +179,58 @@ async def on_ready():
         if log_channel:
             await log_channel.send(embed=embed, view=view)
 
+@bot.tree.command(name="terminate", description="Terminate a user.")
+@commands.has_permissions(administrator=True)  # Restricts command to server admins
+async def terminate_user(interaction: discord.Interaction, user: discord.User):  # Renamed function to match the command name
+    await interaction.response.defer()  # Defer the response to avoid the 'already acknowledged' error
+    guild = await bot.fetch_guild(GUILD_ID)
+    member = await guild.fetch_member(interaction.user.id)
+
+    if member:
+        # Debugging: print out the user's role IDs
+        print(f"{interaction.user.name} roles: {[role.id for role in member.roles]}")
+
+        if any(role.id == RANKING_ROLE_ID for role in member.roles):  # Check if user has a required role
+            try:
+                roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
+
+                # First API call to fetch Roblox ID
+                response_roblox = requests.get(
+                    f"https://api.blox.link/v4/public/guilds/1272622697079377920/discord-to-roblox/{user.id}",
+                    headers={"Authorization": "2e306432-1dcc-4d3a-88d2-3fdb7d84a221"}
+                )
+                if response_roblox.status_code == 200:
+                    data = response_roblox.json()
+                    roblox_id = data.get("robloxID")  # Extract the 'robloxID' field
+                    if not roblox_id:
+                        await interaction.followup.send("Could not find a Roblox ID for this user.")
+                        return
+                else:
+                    await interaction.followup.send(f"Failed to fetch Roblox ID. Status Code: {response_roblox.status_code}")
+                    return
+            except Exception as e:
+                await interaction.followup.send(f"An error occurred while fetching Roblox ID: {e}")
+                return
+
+            # Second API call to rank the user
+            full_url = f"https://ranking.cjscommissions.xyz/group/rank/?groupid=16461735&user_id={roblox_id}&role_number=1&key=CJSCOMMSRANK"
+            try:
+                response_rank = requests.get(full_url)
+                if response_rank.status_code == 200:
+                    data = response_rank.json()
+                    message = data.get("message")
+                    if message == f"The user's rank has been set to 1!":
+                        await interaction.followup.send(f"Successfully terminated the user!")
+                    else:
+                        await interaction.followup.send(f"Error: {message}")
+                else:
+                    await interaction.followup.send(f"Failed to terminate user. Status Code: {response_rank.status_code}")
+            except Exception as e:
+                await interaction.followup.send(f"An error occurred during termination: {e}")
+        else:
+            await interaction.followup.send("You do not have the required role to terminate users.")
+    else:
+        await interaction.followup.send("Could not fetch the member details.")
 @bot.tree.command(name="direct-message", description="Send a DM to a user")
 async def dm(interaction: discord.Interaction, user: discord.User, message: str):
     embed = discord.Embed(
@@ -396,7 +468,7 @@ async def shift(interaction: discord.Interaction):
 
             # Send the message with or without the role ping (conditionally)
             if role_to_ping:
-                await channel.send(content=f"<@&1325941898212540426>", embed=embed)
+                await channel.send(content=f"@everyone", embed=embed)
             else:
                 await channel.send(embed=embed)
 
@@ -844,25 +916,35 @@ class LoaForm(Modal, title="Request An LOA"):
             await log_channel.send(embed=embed, view=view)
         await interaction.response.send_message("Your LOA request has been submitted!", ephemeral=True)
 
+
 @bot.tree.command(name="request-loa", description="Request an LOA")
 async def requestloa(interaction: discord.Interaction):
-    await interaction.response.send_message(
-            "LOA Request's are currently disabled.",
-            ephemeral=False
+    if LOA_OPEN:  # No need for == True, since it's already a boolean
+        try:
+            # Send the LOA modal form
+            await interaction.response.send_modal(LoaForm(bot))
+        except Exception as e:
+            print(f"Error showing modal: {e}")
+            await interaction.response.send_message(
+                "An error occurred while processing your request. Please try again later.",
+                ephemeral=True
+            )
+    else:
+        await interaction.response.send_message(
+            "LOA Requests are disabled.",
+            ephemeral=True
         )
-    #try:
-        # Instantiate the modal form
-        #modal = LoaForm(bot)
-        
-        # Send the modal to the user
-        #await interaction.response.send_modal(modal)
-    #except Exception as e:
-        # Catch and log any errors
-        #print(f"Error showing modal: {e}")
-        #await interaction.response.send_message(
-            #"An error occurred while processing your request. Please try again later.",
-            #ephemeral=True
-        #)
+@bot.tree.command(name="toggle-loa", description="Enable or disable LOA requests (Admin only)")
+@commands.has_permissions(administrator=True)  # Restricts command to server admins
+async def toggle_loa(interaction: discord.Interaction):
+    global LOA_OPEN  # Allows modification of the global variable
+    LOA_OPEN = not LOA_OPEN  # Toggle the value (True -> False, False -> True)
+
+    status = "enabled" if LOA_OPEN else "disabled"
+    await interaction.response.send_message(
+        f"LOA requests have been **{status}**.",
+        ephemeral=True  # Message is only visible to the admin
+    )
 @bot.tree.command(name="restart", description="Restarts the bot.")
 @commands.is_owner()
 async def restart(interaction: discord.Interaction):
@@ -961,58 +1043,6 @@ async def strike(interaction: discord.Interaction, member: discord.User, reason:
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
-  logger = logging.getLogger("bot")
 
-class DebugCommands(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.log_file_path = "bot_console.log"  # File where console logs will be saved
-
-    @bot.tree.command(name="hastebin")
-    @commands.is_owner()
-    async def debug_hastebin(self, ctx):
-        """Posts bot's console logs to Hastebin."""
-        haste_url = os.environ.get("HASTE_URL", "https://hastebin.cc")
-
-        # Ensure console output is logged to a file
-        sys.stdout.flush()  # Flush the current output buffer
-        with open(self.log_file_path, "rb") as f:
-            logs = BytesIO(f.read().strip())
-
-        try:
-            async with self.bot.session.post(f"{haste_url}/documents", data=logs) as resp:
-                data = await resp.json()
-                key = data.get("key")
-
-                if not key:
-                    logger.error(f"Failed to upload logs: {data}")
-                    raise KeyError("No key returned from Hastebin")
-
-                embed = discord.Embed(
-                    title="Debug Logs",
-                    color=self.bot.main_color,
-                    description=f"[View Logs]({haste_url}/{key})",
-                )
-        except (JSONDecodeError, ClientResponseError, KeyError) as e:
-            logger.error(f"Error uploading logs: {e}")
-            embed = discord.Embed(
-                title="Debug Logs",
-                color=self.bot.main_color,
-                description="Something went wrong. Unable to upload logs to Hastebin.",
-            )
-            embed.set_footer(text="Check your bot's console manually.")
-
-        await ctx.send(embed=embed)
-    
-    def capture_console_logs(self):
-        """Redirects console output to a log file."""
-        log_file = open(self.log_file_path, "a", encoding="utf-8")
-        sys.stdout = log_file
-        sys.stderr = log_file
-
-def setup(bot):
-    cog = DebugCommands(bot)
-    cog.capture_console_logs()
-    bot.add_cog(cog)
 bot.run(os.getenv("TOKEN"))
 
