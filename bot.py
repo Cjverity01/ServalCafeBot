@@ -1006,7 +1006,6 @@ async def strike(interaction: discord.Interaction, member: discord.User, reason:
                 await member.send(embed=embed)
             except discord.Forbidden:
                 print(f"Could not DM {member.mention}. DMs might be closed.")
-                # Continue execution even if DMs are closed
             
             # After sending the DM, reset the strike count to 0 in the database
             strikecollection.update_one(
@@ -1014,6 +1013,20 @@ async def strike(interaction: discord.Interaction, member: discord.User, reason:
                 {"$set": {"strikes": 0}},  # Reset the strikes to 0
                 upsert=True
             )
+
+        else:
+            # Send the general strike message to the user
+            embed = discord.Embed(
+                title="You have been striked",
+                description=f"Hello, {member.mention}. You have received a strike for {reason}.",
+                color=hex_color
+            )
+            embed.set_footer(text="Bot Powered by Cj's Commissions")
+            try:
+                await member.send(embed=embed)
+            except discord.Forbidden:
+                print(f"Could not DM {member.mention}. DMs might be closed.")
+                # Continue execution even if DMs are closed
 
         # Now, handle the Roblox ID fetch and ranking
         roblox_id = None  # Initialize roblox_id to prevent unbound variable errors
@@ -1043,6 +1056,7 @@ async def strike(interaction: discord.Interaction, member: discord.User, reason:
     except Exception as e:
         print(f"Error in strike command: {e}")
         await interaction.response.send_message("An error occurred while applying the strike.", ephemeral=True)
+
 
 bot.run(os.getenv("TOKEN"))
 
