@@ -66,20 +66,25 @@ client = MongoClient(mongo_uri)
 db = client["ServalCafe"]
 collection = db["requests"]
 
+logger = getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(handler)
 
 @bot.event
 async def on_ready():
     bot.session = aiohttp.ClientSession()
     print("Loading...")
-    print("---------------------")
-    print("Authors: cj_daboi36.")
-    print("---------------------")
+    logger.info("-" * 20)
+    logger.info("Authors: cj_daboi36.")
+    logger.info("-" * 20)
     await bot.tree.sync()  # Sync slash commands to Discord
-    print("Slash commands synced")
-    print("---------------------")
-    print(f'Loaded! Connected To: {bot.user}')
-    print("---------------------")
-    print("Started Successfully!")
+    logger.info("Slash commands synced")
+    logger.info("-" * 20)
+    logger.info(f'Loaded! Connected To: {bot.user}')
+    logger.info("-" * 20)
+    logger.info("Started Successfully!")
 
     # Fetch pending requests from MongoDB on restart
     pending_requests = collection.find({"status": "pending"})
