@@ -949,7 +949,8 @@ async def toggle_loa(interaction: discord.Interaction):
 @commands.is_owner()
 async def restart(interaction: discord.Interaction):
     await interaction.response.send_message("Restarting bot... 🔄", ephemeral=True)
-    subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
+    sys.exit()
+# Restart the bot using PM2
 @bot.tree.command(name="update", description="Pulls latest code and restarts the bot (Owner only)")
 @commands.is_owner()
 async def update(interaction: discord.Interaction):
@@ -965,10 +966,13 @@ async def update(interaction: discord.Interaction):
         await interaction.followup.send("✅ Bot is already up to date!", ephemeral=True)
     else:
         await interaction.followup.send("✅ Update pulled! Restarting bot... 🔄", ephemeral=True)
-        subprocess.run(["pm2", "restart", "scbot"])  # Restart the bot using PM2
+        sys.exit()  # Restart the bot using PM2
 strikecollection = db["strikes"]
 @bot.tree.command(name="strike", description="Give a user a strike with a reason.")
+@commands.has_permissions(administrator=True)  # Restricts command to server admins
 async def strike(interaction: discord.Interaction, member: discord.User, reason: str):
+    if member.id == "1050494667613012049":
+        await interaction.response.send_message(f"You Can't strike <@1050494667613012049>, Silly!", ephemeral=True)
     try:
         # Fetch the user data from MongoDB (synchronously)
         user_data = strikecollection.find_one({"user_id": member.id})
