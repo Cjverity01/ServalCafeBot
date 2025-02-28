@@ -20,6 +20,7 @@ import requests
 import time
 from datetime import datetime
 from discord import app_commands
+from logging import getLogger
 from aiohttp import ClientResponseError
 from json import JSONDecodeError
 from io import BytesIO
