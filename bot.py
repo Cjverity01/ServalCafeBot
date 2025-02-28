@@ -76,7 +76,7 @@ logger.addHandler(handler)
 @bot.event
 async def on_ready():
     bot.session = aiohttp.ClientSession()
-    print("Loading...")
+    logger.info("Loading...")
     logger.info("-" * 20)
     logger.info("Authors: cj_daboi36.")
     logger.info("-" * 20)
